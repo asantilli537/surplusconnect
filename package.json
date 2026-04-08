@@ -1,0 +1,26 @@
+{
+  "name": "surplusconnect",
+  "version": "1.0.0",
+  "description": "CS546-A Group 4 Final Project: SurplusConnect",
+  "homepage": "https://github.com/asantilli537/surplusconnect#readme",
+  "bugs": {
+    "url": "https://github.com/asantilli537/surplusconnect/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asantilli537/surplusconnect.git"
+  },
+  "license": "ISC",
+  "author": "Group 4",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "express-handlebars": "^9.0.1",
+    "mongodb": "^7.1.1"
+  }
+}
