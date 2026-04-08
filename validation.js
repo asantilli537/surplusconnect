@@ -23,7 +23,8 @@ export const checkIfValidId = (id) => {
 };
 
 export const checkIfValidEmail = (email) => {
-    /* Takes in the email as a string,
+    /*
+        Takes in the email as a string,
        and returns the email if it's a
        valid email address.
        Also validates the string and trims it.
@@ -38,7 +39,9 @@ export const checkIfValidEmail = (email) => {
 };
 
 export const getCurrentDate = () => {
-    /* Get the current date and return it as a string. */
+    /*
+        Get the current date and return it as a string.
+    */
     let currentDate = new Date();
     currentDate = formatDate(currentDate);
     return currentDate;
