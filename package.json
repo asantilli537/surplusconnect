@@ -15,12 +15,15 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "express-handlebars": "^9.0.1",
-    "mongodb": "^7.1.1"
+    "express-session": "^1.19.0",
+    "mongodb": "^7.1.1",
+    "xss": "^1.0.15"
   }
 }
