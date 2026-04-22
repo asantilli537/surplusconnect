@@ -5,3 +5,14 @@
 import {listings} from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 
+
+export const claimListingById = (id) => {
+    /*
+        Claim an available listing by its Id.
+    */
+    
+};
+
+export const calcPriorityById = (id) => {
+
+};
