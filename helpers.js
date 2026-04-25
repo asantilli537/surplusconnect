@@ -3,6 +3,8 @@ This file contains helper functions that will be used throughout the project.
 These functions can be used for date/time formatting, input validation, or other repetitive tasks.
 */
 
+import {ObjectId} from 'mongodb';
+
 // Function to check validity of a string input
 export const checkStringValidity = (string, minLength = 1, maxLength = 100) => {
   // Check if string has a value
@@ -19,6 +21,14 @@ export const checkStringValidity = (string, minLength = 1, maxLength = 100) => {
   if (string.length < minLength || string.length > maxLength) return false;
 
   return true;
+};
+
+// Function to automatically trim or throw strings.
+export const checkAndThrowString = (string, title, minLength = 1, maxLength = 100) => {
+  if (!checkStringValidity(string, minLength, maxLength)) {
+    throw `String ${title} is not a valid string.`
+  }
+  return string.trim();
 };
 
 // Function to get the current date in MM/DD/YYYY format
@@ -94,3 +104,16 @@ export const checkPasswordValidity = (password) => {
   // check upper, lower, number, special
   return true;
 };
+
+// Function to check ObjectId validity. 
+export const checkIdValidity = (id) => { 
+    id = id.trim();
+    if (!checkStringValidity(id)) return false;
+    if (!ObjectId.isValid(id)) return false;
+    return true;
+};
+
+export const checkAndThrowId = (id, title = "Id") => {
+  if (!checkIdValidity(id)) throw `${id} is not a valid ObjectId.`;
+  return id.trim();
+}
