@@ -15,6 +15,7 @@ const getCollectionFn = (collection) => {
   };
 };
 
-/* Now, you can list your collections here:
-NOTE: YOU WILL NEED TO CHANGE THE CODE BELOW TO HAVE THE COLLECTION(S) REQUIRED BY THE ASSIGNMENT */
 export const listings = getCollectionFn('listings');
+export const trasactions = getCollectionFn('transactions');
+export const addresses = getCollectionFn('addresses');
+export const receipts = getCollectionFn('receipts');
