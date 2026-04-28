@@ -4,10 +4,11 @@
 import {listings} from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import * as helpers from '../helpers.js';
+import { getEquipmentById } from '../../lab06/data/equipment.js';
 
 
 /* Make a new listing and put it in the database. */
-export const makeNewListing = (
+export const makeNewListing = async (
     distributorId, // id of distributor
     title, 
     description,
@@ -29,6 +30,14 @@ export const makeNewListing = (
     notes = helpers.checkAndThrowString(notes, 1, MAX_DESC, "notes");
     addressId = helpers.checkAndThrowId(addressId, "addressId");
     /* TODO: pickup start and ending times (how are they formatted, how to parse?) */
+
+    const listingCollection = await listings();
+    const insertInfo = await listingCollection.insertOne(newListing);
+    if (!insertInfo.acknowledged || !insertInfo.insertedId) {
+        throw 'Could not add listing.';
+    }
+    const newId = insertInfo.insertedId;
+    return await this.getListingById(newId.toString());
 };
 
 /* Input-checking, checks a list of item objects as uploaded. */
@@ -89,13 +98,18 @@ export const parseFoodCategory = (foodCategory) => {
 
 /* Get a single listing by its listing id. */
 export const getListingById = (listingId) => {
-    
+    listingId = helpers.checkAndThrowId(listingId);
+    const listingCollection = await listings();
+    const listing = await listingCollection.findOne({_id: new ObjectId(listingId)});
+    if (!listing) throw 'Listing by Id not found.';
+    return listing;
 };
 
-/* Gets all active listings by the distributor id. */
-export const getListingsByDistributor = (distributorId) => {
-    
-
+/* Gets all active listings by the donor id. */
+export const getListingsByDonor = (id) => {
+    id = helpers.checkAndThrowId(id);
+    const listingCollection = await listings();
+    return await listingCollection.find({donorId: id})
 };
 
 /* Gets all listings whose status is "active". */ 
