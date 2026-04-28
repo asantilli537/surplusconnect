@@ -5,6 +5,7 @@ import {listings} from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import * as helpers from '../helpers.js';
 import { getEquipmentById } from '../../lab06/data/equipment.js';
+import NodeGeocoder from 'node-geocoder';
 
 
 /* Make a new listing and put it in the database. */
@@ -30,8 +31,22 @@ export const makeNewListing = async (
     notes = helpers.checkAndThrowString(notes, 1, MAX_DESC, "notes");
     addressId = helpers.checkAndThrowId(addressId, "addressId");
     /* TODO: pickup start and ending times (how are they formatted, how to parse?) */
-
+    
     const listingCollection = await listings();
+    let newListing = {
+        distributorId,
+        title,
+        description,
+        items: itemList,
+        foodCategory,
+        notes,
+        addressId,
+        status: "active",
+        postedAt: helpers.getCurrentDateTime(),
+        pickupStart: "", //TODO
+        pickupEnd: "",   //TODO 
+        claimedVendorId: null
+    };
     const insertInfo = await listingCollection.insertOne(newListing);
     if (!insertInfo.acknowledged || !insertInfo.insertedId) {
         throw 'Could not add listing.';
@@ -50,7 +65,6 @@ export const parseItems = (itemList) => {
 
     /* Make sure all the keys of each item is there, and make sure it's an item list. */
     for (item of itemList) {
-        
         if (typeof item !== "object" || item === undefimed || item === null) {
             throw `Entry in itemList is not a valid object.`;
         }
@@ -97,26 +111,60 @@ export const parseFoodCategory = (foodCategory) => {
 };
 
 /* Get a single listing by its listing id. */
-export const getListingById = (listingId) => {
-    listingId = helpers.checkAndThrowId(listingId);
+export const getListingById = async (id) => {
+    id = helpers.checkAndThrowId(id);
     const listingCollection = await listings();
-    const listing = await listingCollection.findOne({_id: new ObjectId(listingId)});
+    const listing = await listingCollection.findOne({_id: new ObjectId(id)});
     if (!listing) throw 'Listing by Id not found.';
     return listing;
 };
 
-/* Gets all active listings by the donor id. */
-export const getListingsByDonor = (id) => {
+/* Gets all listings whose status is "active" by the donor id. */
+export const getListingsByDonor = async (id) => {
     id = helpers.checkAndThrowId(id);
     const listingCollection = await listings();
-    return await listingCollection.find({donorId: id})
+    let theListings = await listingCollection.find({
+        donorId: id,
+        status: "active"
+    });
+    if (!theListings) throw `Listings not found from this donor Id.`
+    return theListings;
 };
 
 /* Gets all listings whose status is "active". */ 
-export const getAllActiveListings = () => {
-    
+export const getAllActiveListings = async () => {
+    const listingCollection = await listings();
+    let theListings = await listingCollection.find({
+        status: "active"
+    });
+    if (!theListings) throw `Listings not found from this donor Id.`
+    return theListings;
 };
 
+/* Calculate priority by the Id number.  --> Priority should be client-side, no? */
 export const calcPriorityById = (id) => {
+    // TODO, requires the time of the listing at that point in time
+    // discuss this soon?
+};
 
+/* Return an object with longitude and latitude for an
+   address string using node-geocoder. */
+export const getLocationFromAddress = async (address) => {
+    // Set options to run geocoding on the validated string.
+    const options = {
+        provider: 'openstreetmap'
+    };
+    const geocoder = NodeGeocoder(options);
+    address = helpers.checkAndThrowString(address);
+    let returnObject = {};
+    try {
+        const res_object = await geocoder.geocode(address);
+        returnObject = {
+            latitude: res_object.latitude,
+            longitude: res_object.longitude
+        };
+    } catch (e) {
+        throw `Location error, address is invalid.`;
+    }
+    return returnObject;
 };
