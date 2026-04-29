@@ -14,7 +14,7 @@ const chatEmpty     = document.getElementById('chat-empty');
 
 if (!feed || !chatForm) {
   // not on the chat page, nothing to do
-  throw new Error('chat elements not found');
+  return;
 }
 
 const transactionId = feed.dataset.transactionId;
@@ -40,15 +40,26 @@ const buildBubble = (msg) => {
   div.dataset.messageId  = msg._id;
   div.dataset.timestamp  = msg.timestamp;
 
-  // formatting the timestamp to something readable
-  const ts = new Date(msg.timestamp);
+  const ts      = new Date(msg.timestamp);
   const timeStr = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  div.innerHTML = `
-    <span class="message-sender">${msg.senderName}</span>
-    <p class="message-text">${msg.content}</p>
-    <span class="message-time">${timeStr}</span>
-  `;
+  // using textContent for user-supplied values to prevent XSS
+  // never use innerHTML with content that came from user input
+  const senderEl  = document.createElement('span');
+  senderEl.className   = 'message-sender';
+  senderEl.textContent = msg.senderName;
+
+  const textEl  = document.createElement('p');
+  textEl.className   = 'message-text';
+  textEl.textContent = msg.content;
+
+  const timeEl  = document.createElement('span');
+  timeEl.className   = 'message-time';
+  timeEl.textContent = timeStr;
+
+  div.appendChild(senderEl);
+  div.appendChild(textEl);
+  div.appendChild(timeEl);
 
   return div;
 };
