@@ -101,10 +101,14 @@ export const claimListingById = (listingId, vendorId) => {
     vendorId = helpers.checkAndThrowId(vendorId);
     const listingCollection = await listings();
     let theListing = await listingCollection.find({
-        _id: listingId,
-        status: "active"
+        _id: listingId
     });
-    if (!theListings) throw `claimListingById: Listing is either claimed or does not exist.`;
+    if (!theListings) throw `claimListingById: Listing does not exist.`;
+    if (theListing.status === "claimed") throw `claimListingById: Listing is already claimed.`;
+    if (theListings.status !== "active") throw `claimListingById: Listing is not active and cannot be claimed.`;
+
+    /* TODO: time check to automatically expire listings? */
+
     theListing.status = "claimed";
     theListing.claimedVendorId = vendorId;
 };
