@@ -3,26 +3,24 @@ import { requireRole } from '../middleware.js';
 
 const router = Router();
 
-// applying the donor role check to every route in this file at once
-router.use(requireRole('donor'));
-
 // ---- dashboard ----
 
-router.route('/donor/dashboard').get(async (req, res) => {
+router.route('/donor/dashboard').get(requireRole('donor'), async (req, res) => {
   try {
     const activeListings  = [];
     const recentDonations = [];
 
     return res.render('donor/dashboard', {
-      pageTitle:        'My Dashboard',
-      user:             req.session.user,
+      pageTitle:          'My Dashboard',
+      user:               req.session.user,
       activeListings,
       recentDonations,
       hasActiveListings:  activeListings.length > 0,
       hasRecentDonations: recentDonations.length > 0,
-      totalDonations:   0,
-      activeCount:      0,
-      claimedCount:     0,
+      totalDonations:     0,
+      activeCount:        0,
+      claimedCount:       0,
+      pageScripts:        ['/public/js/listing-timer.js'],
     });
   } catch (e) {
     return res.status(500).render('error', {
@@ -36,15 +34,15 @@ router.route('/donor/dashboard').get(async (req, res) => {
 // ---- create listing ----
 
 router.route('/listings/create')
-  .get(async (req, res) => {
+  .get(requireRole('donor'), async (req, res) => {
     return res.render('donor/listing-create', {
-      pageTitle: 'Post a Listing',
-      user: req.session.user,
+      pageTitle:   'Post a Listing',
+      user:        req.session.user,
+      pageScripts: ['/public/js/form-validation.js'],
     });
   })
-  .post(async (req, res) => {
+  .post(requireRole('donor'), async (req, res) => {
     try {
-      // createListing() data function wired in later
       return res.redirect('/donor/dashboard');
     } catch (e) {
       return res.status(400).render('donor/listing-create', {
@@ -59,9 +57,8 @@ router.route('/listings/create')
 // ---- edit listing ----
 
 router.route('/listings/:id/edit')
-  .get(async (req, res) => {
+  .get(requireRole('donor'), async (req, res) => {
     try {
-      // getListingById(req.params.id) wired in later
       const listing = null;
 
       if (!listing) {
@@ -73,9 +70,10 @@ router.route('/listings/:id/edit')
       }
 
       return res.render('donor/listing-edit', {
-        pageTitle: 'Edit Listing',
-        user: req.session.user,
+        pageTitle:   'Edit Listing',
+        user:        req.session.user,
         listing,
+        pageScripts: ['/public/js/form-validation.js'],
       });
     } catch (e) {
       return res.status(500).render('error', {
@@ -85,9 +83,8 @@ router.route('/listings/:id/edit')
       });
     }
   })
-  .post(async (req, res) => {
+  .post(requireRole('donor'), async (req, res) => {
     try {
-      // updateListing() wired in later
       return res.redirect('/donor/dashboard');
     } catch (e) {
       return res.status(400).render('donor/listing-edit', {
@@ -101,9 +98,8 @@ router.route('/listings/:id/edit')
 
 // ---- delete listing ----
 
-router.route('/listings/:id/delete').post(async (req, res) => {
+router.route('/listings/:id/delete').post(requireRole('donor'), async (req, res) => {
   try {
-    // deleteListing() wired in later
     return res.redirect('/donor/dashboard');
   } catch (e) {
     return res.status(500).render('error', {
@@ -116,13 +112,13 @@ router.route('/listings/:id/delete').post(async (req, res) => {
 
 // ---- donation history ----
 
-router.route('/donor/history').get(async (req, res) => {
+router.route('/donor/history').get(requireRole('donor'), async (req, res) => {
   try {
     const pastDonations = [];
 
     return res.render('donor/listing-history', {
-      pageTitle:       'My Donation History',
-      user:            req.session.user,
+      pageTitle:        'My Donation History',
+      user:             req.session.user,
       pastDonations,
       hasPastDonations: pastDonations.length > 0,
     });

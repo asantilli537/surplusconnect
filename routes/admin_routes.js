@@ -3,12 +3,9 @@ import { requireRole } from '../middleware.js';
 
 const router = Router();
 
-// applying admin role check to every route in this file
-router.use(requireRole('admin'));
-
 // ---- dashboard ----
 
-router.route('/admin/dashboard').get(async (req, res) => {
+router.route('/admin/dashboard').get(requireRole('admin'), async (req, res) => {
   try {
     const stats = {
       totalUsers:        0,
@@ -21,8 +18,8 @@ router.route('/admin/dashboard').get(async (req, res) => {
     const recentAuditLogs  = [];
 
     return res.render('admin/dashboard', {
-      pageTitle: 'Admin Dashboard',
-      user:      req.session.user,
+      pageTitle:           'Admin Dashboard',
+      user:                req.session.user,
       stats,
       recentComplaints,
       recentAuditLogs,
@@ -40,10 +37,10 @@ router.route('/admin/dashboard').get(async (req, res) => {
 
 // ---- users list ----
 
-router.route('/admin/users').get(async (req, res) => {
+router.route('/admin/users').get(requireRole('admin'), async (req, res) => {
   try {
-    const users               = [];
-    const { role, status }    = req.query;
+    const users            = [];
+    const { role, status } = req.query;
 
     return res.render('admin/users', {
       pageTitle:    'Manage Users',
@@ -64,9 +61,8 @@ router.route('/admin/users').get(async (req, res) => {
 
 // ---- suspend a user ----
 
-router.route('/admin/users/:id/suspend').post(async (req, res) => {
+router.route('/admin/users/:id/suspend').post(requireRole('admin'), async (req, res) => {
   try {
-    // suspendUser(req.params.id, req.session.user._id) wired in later
     return res.redirect('/admin/users');
   } catch (e) {
     return res.status(500).render('error', {
@@ -79,9 +75,8 @@ router.route('/admin/users/:id/suspend').post(async (req, res) => {
 
 // ---- unsuspend a user ----
 
-router.route('/admin/users/:id/unsuspend').post(async (req, res) => {
+router.route('/admin/users/:id/unsuspend').post(requireRole('admin'), async (req, res) => {
   try {
-    // unsuspendUser(req.params.id, req.session.user._id) wired in later
     return res.redirect('/admin/users');
   } catch (e) {
     return res.status(500).render('error', {
@@ -94,10 +89,10 @@ router.route('/admin/users/:id/unsuspend').post(async (req, res) => {
 
 // ---- complaints list ----
 
-router.route('/admin/complaints').get(async (req, res) => {
+router.route('/admin/complaints').get(requireRole('admin'), async (req, res) => {
   try {
-    const complaints      = [];
-    const { status }      = req.query;
+    const complaints   = [];
+    const { status }   = req.query;
 
     return res.render('admin/complaints', {
       pageTitle:     'Complaints',
@@ -117,9 +112,8 @@ router.route('/admin/complaints').get(async (req, res) => {
 
 // ---- single complaint detail ----
 
-router.route('/admin/complaints/:id').get(async (req, res) => {
+router.route('/admin/complaints/:id').get(requireRole('admin'), async (req, res) => {
   try {
-    // getComplaintById(req.params.id) wired in later
     const complaint = null;
 
     if (!complaint) {
@@ -146,9 +140,8 @@ router.route('/admin/complaints/:id').get(async (req, res) => {
 
 // ---- resolve a complaint ----
 
-router.route('/admin/complaints/:id/resolve').post(async (req, res) => {
+router.route('/admin/complaints/:id/resolve').post(requireRole('admin'), async (req, res) => {
   try {
-    // resolveComplaint(req.params.id, req.session.user._id) wired in later
     return res.redirect('/admin/complaints');
   } catch (e) {
     return res.status(500).render('error', {
@@ -161,10 +154,10 @@ router.route('/admin/complaints/:id/resolve').post(async (req, res) => {
 
 // ---- audit log ----
 
-router.route('/admin/audit-log').get(async (req, res) => {
+router.route('/admin/audit-log').get(requireRole('admin'), async (req, res) => {
   try {
-    const auditLogs     = [];
-    const { action }    = req.query;
+    const auditLogs    = [];
+    const { action }   = req.query;
 
     return res.render('admin/audit-log', {
       pageTitle:    'Audit Log',
