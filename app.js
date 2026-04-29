@@ -29,6 +29,14 @@ app.engine(
       if_eq(a, b, opts) {
         return a === b ? opts.fn(this) : opts.inverse(this);
       },
+      // checking if a is greater than b
+      if_gt(a, b, opts) {
+        return a > b ? opts.fn(this) : opts.inverse(this);
+      },
+      // checking if a is less than b
+      if_lt(a, b, opts) {
+        return a < b ? opts.fn(this) : opts.inverse(this);
+      },
     },
   })
 );
