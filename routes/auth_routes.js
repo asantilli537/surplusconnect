@@ -4,12 +4,13 @@ Depending on user role, the sign up forms will contain different fields. Sign up
 */
 
 import { Router } from 'express';
+import { requireGuest } from '../middleware.js';
+
 const router = Router();
 
-// ---- landing and auth routes ----
+// ---- landing page ----
 
 router.route('/').get(async (req, res) => {
-  // sending logged-in users straight to their dashboard
   if (req.session.user) {
     const role = req.session.user.role;
     if (role === 'donor')       return res.redirect('/donor/dashboard');
@@ -24,75 +25,81 @@ router.route('/').get(async (req, res) => {
   });
 });
 
-router.route('/login')
-  .get(async (req, res) => {
-    // already logged in, no need to show login page
-    if (req.session.user) return res.redirect('/');
+// ---- login ----
 
+router.route('/login')
+  .get(requireGuest, async (req, res) => {
     return res.render('auth/login', {
       pageTitle: 'Sign In',
       user: null,
+      pageScripts: ['/public/js/form-validation.js'],
     });
   })
   .post(async (req, res) => {
-    // login POST will be wired to data functions later
+    // login POST wired to data functions later
     return res.redirect('/');
   });
 
-router.route('/signup')
-  .get(async (req, res) => {
-    if (req.session.user) return res.redirect('/');
+// ---- role selection ----
 
+router.route('/signup')
+  .get(requireGuest, async (req, res) => {
     return res.render('auth/signup-select', {
       pageTitle: 'Create an Account',
       user: null,
     });
   });
 
-router.route('/signup/donor')
-  .get(async (req, res) => {
-    if (req.session.user) return res.redirect('/');
+// ---- donor signup ----
 
+router.route('/signup/donor')
+  .get(requireGuest, async (req, res) => {
     return res.render('auth/signup-donor', {
       pageTitle: 'Register as a Food Donor',
       user: null,
+      pageScripts: ['/public/js/form-validation.js'],
     });
   })
   .post(async (req, res) => {
-    // donor signup POST wired to data layer later
     return res.redirect('/login');
   });
 
-router.route('/signup/distributor')
-  .get(async (req, res) => {
-    if (req.session.user) return res.redirect('/');
+// ---- distributor signup ----
 
+router.route('/signup/distributor')
+  .get(requireGuest, async (req, res) => {
     return res.render('auth/signup-distributor', {
       pageTitle: 'Register as a Distributor',
       user: null,
+      pageScripts: ['/public/js/form-validation.js'],
     });
   })
   .post(async (req, res) => {
     return res.redirect('/login');
   });
 
-router.route('/signup/volunteer')
-  .get(async (req, res) => {
-    if (req.session.user) return res.redirect('/');
+// ---- volunteer signup ----
 
+router.route('/signup/volunteer')
+  .get(requireGuest, async (req, res) => {
     return res.render('auth/signup-volunteer', {
       pageTitle: 'Register as a Volunteer Courier',
       user: null,
+      pageScripts: ['/public/js/form-validation.js'],
     });
   })
   .post(async (req, res) => {
     return res.redirect('/login');
   });
+
+// ---- signout ----
 
 router.route('/signout').get(async (req, res) => {
   req.session.destroy();
   return res.redirect('/');
 });
+
+// ---- notifications ----
 
 router.route('/notifications').get(async (req, res) => {
   if (!req.session.user) return res.redirect('/login');
