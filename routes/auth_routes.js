@@ -94,4 +94,25 @@ router.route('/signout').get(async (req, res) => {
   return res.redirect('/');
 });
 
+router.route('/notifications').get(async (req, res) => {
+  if (!req.session.user) return res.redirect('/login');
+
+  try {
+    const notifications = [];
+
+    return res.render('notifications/index', {
+      pageTitle:     'Notifications',
+      user:          req.session.user,
+      notifications,
+      unreadCount:   0,
+    });
+  } catch (e) {
+    return res.status(500).render('error', {
+      pageTitle: 'Error',
+      user: req.session.user,
+      error: e.message,
+    });
+  }
+});
+
 export default router;
