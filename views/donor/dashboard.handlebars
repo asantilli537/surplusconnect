@@ -1,0 +1,110 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">good morning, {{user.firstName}}</h1>
+      <p class="page-subtitle">
+        here's what's happening with your donations today
+      </p>
+    </div>
+    <a href="/listings/create" class="btn btn-primary">
+      + post a listing
+    </a>
+  </div>
+</div>
+
+<div class="container">
+
+  {{!-- stat summary row --}}
+  <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
+    <div class="stat-card">
+      <span class="stat-value">{{totalDonations}}</span>
+      <span class="stat-label">total donations made</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{activeCount}}</span>
+      <span class="stat-label">active listings right now</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{claimedCount}}</span>
+      <span class="stat-label">listings claimed this month</span>
+    </div>
+  </div>
+
+  {{!-- active listings section --}}
+  <section class="dashboard-section" aria-labelledby="active-listings-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="active-listings-heading">
+        active listings
+      </h2>
+      <a href="/listings/create" class="btn btn-secondary btn-sm">
+        post new
+      </a>
+    </div>
+
+    {{#if hasActiveListings}}
+      <div class="listings-grid" id="listings-grid">
+        {{#each activeListings}}
+          {{> listing-card listing=this showActions=true}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">
+          you don't have any active listings right now
+        </p>
+        <a href="/listings/create" class="btn btn-primary btn-sm">
+          post your first listing
+        </a>
+      </div>
+    {{/if}}
+
+  </section>
+
+  {{!-- recent donations section --}}
+  <section class="dashboard-section" aria-labelledby="recent-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="recent-heading">recent donations</h2>
+      <a href="/donor/history" class="btn btn-ghost btn-sm">
+        view all
+      </a>
+    </div>
+
+    {{#if hasRecentDonations}}
+      <div class="history-table-wrap">
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">listing</th>
+              <th scope="col">claimed by</th>
+              <th scope="col">date</th>
+              <th scope="col">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each recentDonations}}
+              <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.claimedBy}}</td>
+                <td>{{this.date}}</td>
+                <td>
+                  <span class="badge badge-{{this.status}}">
+                    {{this.status}}
+                  </span>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">
+          no completed donations yet. listings you post will show up
+          here once they have been picked up.
+        </p>
+      </div>
+    {{/if}}
+
+  </section>
+
+</div>
