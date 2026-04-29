@@ -55,6 +55,82 @@ export const makeNewListing = async (
     return await this.getListingById(newId.toString());
 };
 
+/* Get a single listing by its listing id. */
+export const getListingById = async (id) => {
+    id = helpers.checkAndThrowId(id);
+    const listingCollection = await listings();
+    const listing = await listingCollection.findOne({_id: new ObjectId(id)});
+    if (!listing) throw 'getListingById: Listing by Id not found.';
+    return listing;
+};
+
+/* Gets all listings whose status is "active" by the donor id. */
+export const getListingsByDonor = async (id) => {
+    id = helpers.checkAndThrowId(id);
+    const listingCollection = await listings();
+    let theListings = await listingCollection.find({
+        donorId: id,
+        status: "active"
+    });
+    if (!theListings) throw `getListingByDonor: Listings not found from this donor Id.`;
+    return theListings;
+};
+
+/* Gets all listings whose status is "active". */ 
+export const getAllActiveListings = async () => {
+    const listingCollection = await listings();
+    let theListings = await listingCollection.find({
+        status: "active"
+    });
+    if (!theListings) throw `getAllActiveListings: Listings not found from this donor Id.`;
+    return theListings;
+};
+
+/* Delete a listing. */
+export const deleteListingById = async (id) => {
+    id = helpers.checkAndThrowId(id);
+    const listingCollection = await listings();
+    let theListing = await listingCollection.deleteOne({_id: id});
+    if (!theListing) throw `deleteListingById: Listing not found from this donor Id.`;
+    return {isDeleted: true};
+};
+
+/* Claim a listing, given the listingId and the vendorId. */
+export const claimListingById = (listingId, vendorId) => {
+    listingId = helpers.checkAndThrowId(listingId);
+    vendorId = helpers.checkAndThrowId(vendorId);
+    const listingCollection = await listings();
+    let theListing = await listingCollection.find({
+        _id: listingId,
+        status: "active"
+    });
+    if (!theListings) throw `claimListingById: Listing is either claimed or does not exist.`;
+    theListing.status = "claimed";
+    theListing.claimedVendorId = vendorId;
+};
+
+/* Return an object with longitude and latitude for an
+   address string using node-geocoder. */
+export const getLocationFromAddress = async (address) => {
+    // Set options to run geocoding on the validated string.
+    const options = {
+        provider: 'openstreetmap'
+    };
+    const geocoder = NodeGeocoder(options);
+    address = helpers.checkAndThrowString(address);
+    let returnObject = {};
+    try {
+        const res_object = await geocoder.geocode(address);
+        returnObject = {
+            latitude: res_object.latitude,
+            longitude: res_object.longitude
+        };
+    } catch (e) {
+        throw `Location error, address is invalid.`;
+    }
+    return returnObject;
+};
+
 /* Input-checking, checks a list of item objects as uploaded. */
 export const parseItems = (itemList) => {
     const itemKeys = ["name", "quantity", "unit"];
@@ -108,63 +184,4 @@ export const parseFoodCategory = (foodCategory) => {
         throw `foodCategory "${foodCategory}" is not a valid category.`
     }
     return foodCategory;
-};
-
-/* Get a single listing by its listing id. */
-export const getListingById = async (id) => {
-    id = helpers.checkAndThrowId(id);
-    const listingCollection = await listings();
-    const listing = await listingCollection.findOne({_id: new ObjectId(id)});
-    if (!listing) throw 'Listing by Id not found.';
-    return listing;
-};
-
-/* Gets all listings whose status is "active" by the donor id. */
-export const getListingsByDonor = async (id) => {
-    id = helpers.checkAndThrowId(id);
-    const listingCollection = await listings();
-    let theListings = await listingCollection.find({
-        donorId: id,
-        status: "active"
-    });
-    if (!theListings) throw `Listings not found from this donor Id.`
-    return theListings;
-};
-
-/* Gets all listings whose status is "active". */ 
-export const getAllActiveListings = async () => {
-    const listingCollection = await listings();
-    let theListings = await listingCollection.find({
-        status: "active"
-    });
-    if (!theListings) throw `Listings not found from this donor Id.`
-    return theListings;
-};
-
-/* Calculate priority by the Id number.  --> Priority should be client-side, no? */
-export const calcPriorityById = (id) => {
-    // TODO, requires the time of the listing at that point in time
-    // discuss this soon?
-};
-
-/* Return an object with longitude and latitude for an
-   address string using node-geocoder. */
-export const getLocationFromAddress = async (address) => {
-    // Set options to run geocoding on the validated string.
-    const options = {
-        provider: 'openstreetmap'
-    };
-    const geocoder = NodeGeocoder(options);
-    address = helpers.checkAndThrowString(address);
-    let returnObject = {};
-    try {
-        const res_object = await geocoder.geocode(address);
-        returnObject = {
-            latitude: res_object.latitude,
-            longitude: res_object.longitude
-        };
-    } catch (e) {
-        throw `Location error, address is invalid.`;
-    }
-    return returnObject;
 };
