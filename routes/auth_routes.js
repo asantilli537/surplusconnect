@@ -19,3 +19,5 @@ router
   .post(async (req, res) => {
     // Code for signup POST
   });
+
+  export default router;
