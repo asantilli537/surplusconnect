@@ -1,0 +1,99 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">my assignments</h1>
+      <p class="page-subtitle">
+        pickups that have been assigned to you as a courier
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <section class="dashboard-section" aria-labelledby="assigned-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="assigned-heading">active assignments</h2>
+    </div>
+
+    {{#if hasAssigned}}
+      <div class="history-table-wrap card">
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">listing</th>
+              <th scope="col">pickup address</th>
+              <th scope="col">pickup window</th>
+              <th scope="col">distributor</th>
+              <th scope="col">action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each assignedPickups}}
+              <tr class="history-row">
+                <td class="history-title">{{this.listingTitle}}</td>
+                <td>{{this.pickupAddress}}</td>
+                <td>{{this.pickupWindow}}</td>
+                <td>{{this.distributorName}}</td>
+                <td>
+                  <form
+                    action="/volunteer/pickups/{{this._id}}/complete"
+                    method="POST"
+                    class="inline-form"
+                    onsubmit="return confirm('mark this pickup as complete?')"
+                  >
+                    <button type="submit" class="btn btn-primary btn-sm">
+                      mark complete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">
+          no active assignments right now. check back soon.
+        </p>
+      </div>
+    {{/if}}
+  </section>
+
+  <section class="dashboard-section" aria-labelledby="completed-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="completed-heading">completed pickups</h2>
+    </div>
+
+    {{#if hasCompleted}}
+      <div class="history-table-wrap card">
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">listing</th>
+              <th scope="col">completed on</th>
+              <th scope="col">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each completedPickups}}
+              <tr class="history-row">
+                <td class="history-title">{{this.listingTitle}}</td>
+                <td>{{this.completedOn}}</td>
+                <td>
+                  <span class="badge badge-delivered">delivered</span>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">no completed pickups on record yet</p>
+      </div>
+    {{/if}}
+  </section>
+
+</div>

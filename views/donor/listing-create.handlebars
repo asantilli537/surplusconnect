@@ -1,0 +1,246 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">post a food listing</h1>
+      <p class="page-subtitle">
+        fill in the details below so distributors know what is available
+        and when to pick it up
+      </p>
+    </div>
+    <a href="/donor/dashboard" class="btn btn-ghost">
+      &larr; cancel
+    </a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-page-wrap">
+
+    {{#if errorMessage}}
+      <div class="flash-message flash-message--error" role="alert">
+        <span class="flash-text">{{errorMessage}}</span>
+      </div>
+    {{/if}}
+
+    <form
+      class="form-stack"
+      action="/listings/create"
+      method="POST"
+      novalidate
+      id="listing-form"
+    >
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">listing details</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="title">
+            listing title
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="title"
+            name="title"
+            placeholder="e.g. fresh bread and pastries from today"
+            required
+            maxlength="100"
+            value="{{prevData.title}}"
+          />
+          <span class="form-error" id="title-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">
+            description
+          </label>
+          <textarea
+            class="form-textarea"
+            id="description"
+            name="description"
+            placeholder="any extra details about the food, how it's packaged, or special handling instructions"
+            rows="3"
+          >{{prevData.description}}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="foodCategory">
+            food category
+          </label>
+          <select
+            class="form-select"
+            id="foodCategory"
+            name="foodCategory"
+            required
+          >
+            <option value="">select a category</option>
+            <option value="bakery"      {{#if_eq prevData.foodCategory 'bakery'}}selected{{/if_eq}}>bakery</option>
+            <option value="produce"     {{#if_eq prevData.foodCategory 'produce'}}selected{{/if_eq}}>produce</option>
+            <option value="dairy"       {{#if_eq prevData.foodCategory 'dairy'}}selected{{/if_eq}}>dairy</option>
+            <option value="prepared"    {{#if_eq prevData.foodCategory 'prepared'}}selected{{/if_eq}}>prepared meals</option>
+            <option value="meat"        {{#if_eq prevData.foodCategory 'meat'}}selected{{/if_eq}}>meat and poultry</option>
+            <option value="pantry"      {{#if_eq prevData.foodCategory 'pantry'}}selected{{/if_eq}}>pantry items</option>
+            <option value="beverages"   {{#if_eq prevData.foodCategory 'beverages'}}selected{{/if_eq}}>beverages</option>
+            <option value="other"       {{#if_eq prevData.foodCategory 'other'}}selected{{/if_eq}}>other</option>
+          </select>
+          <span class="form-error" id="foodCategory-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="notes">
+            pickup notes
+          </label>
+          <textarea
+            class="form-textarea"
+            id="notes"
+            name="notes"
+            placeholder="e.g. use the side entrance, ask for the manager on duty"
+            rows="2"
+          >{{prevData.notes}}</textarea>
+        </div>
+
+      </fieldset>
+
+      {{!-- dynamic food items section --}}
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">food items</legend>
+
+        <div id="items-container" class="items-container">
+          <div class="item-row" data-index="0">
+            <div class="item-row-fields">
+              <div class="form-group">
+                <label class="form-label form-label--required" for="items[0][name]">
+                  item name
+                </label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="items[0][name]"
+                  name="items[0][name]"
+                  placeholder="e.g. bagels"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="items[0][quantity]">
+                  quantity
+                </label>
+                <input
+                  class="form-input"
+                  type="number"
+                  id="items[0][quantity]"
+                  name="items[0][quantity]"
+                  placeholder="24"
+                  min="1"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="items[0][unit]">
+                  unit
+                </label>
+                <select
+                  class="form-select"
+                  id="items[0][unit]"
+                  name="items[0][unit]"
+                  required
+                >
+                  <option value="pieces">pieces</option>
+                  <option value="trays">trays</option>
+                  <option value="pounds">pounds</option>
+                  <option value="boxes">boxes</option>
+                  <option value="bags">bags</option>
+                  <option value="gallons">gallons</option>
+                  <option value="servings">servings</option>
+                </select>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm remove-item-btn"
+              aria-label="remove this item"
+              style="display: none;"
+            >
+              &times; remove
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          id="add-item-btn"
+        >
+          + add another item
+        </button>
+
+      </fieldset>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">pickup timing</legend>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="pickupStartTime">
+              pickup window start
+            </label>
+            <input
+              class="form-input"
+              type="datetime-local"
+              id="pickupStartTime"
+              name="pickupStartTime"
+              required
+              value="{{prevData.pickupStartTime}}"
+            />
+            <span class="form-error" id="pickupStartTime-error" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label--required" for="pickupEndTime">
+              pickup window end
+            </label>
+            <input
+              class="form-input"
+              type="datetime-local"
+              id="pickupEndTime"
+              name="pickupEndTime"
+              required
+              value="{{prevData.pickupEndTime}}"
+            />
+            <span class="form-error" id="pickupEndTime-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="expirationTime">
+            food expires at
+          </label>
+          <input
+            class="form-input"
+            type="datetime-local"
+            id="expirationTime"
+            name="expirationTime"
+            required
+            value="{{prevData.expirationTime}}"
+          />
+          <span class="form-hint">
+            after this time the listing will be automatically marked expired
+            if unclaimed
+          </span>
+          <span class="form-error" id="expirationTime-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">
+          post listing
+        </button>
+        <a href="/donor/dashboard" class="btn btn-ghost btn-lg">
+          cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>

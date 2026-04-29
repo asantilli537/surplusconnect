@@ -1,0 +1,68 @@
+<a href="#main-content" class="skip-link">skip to main content</a>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-inner">
+
+    <a href="/" class="navbar-brand" aria-label="SurplusConnect home">
+      <span class="brand-icon" aria-hidden="true">&#9652;</span>
+      SurplusConnect
+    </a>
+
+    <button
+      class="navbar-toggle"
+      aria-expanded="false"
+      aria-controls="navbar-menu"
+      aria-label="toggle navigation menu"
+      type="button"
+    >
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+    </button>
+
+    <ul class="navbar-menu" id="navbar-menu" role="list">
+
+      {{#if user}}
+
+        {{#if_eq user.role 'donor'}}
+          <li><a href="/donor/dashboard" class="nav-link">dashboard</a></li>
+          <li><a href="/listings/create" class="nav-link">post a listing</a></li>
+          <li><a href="/donor/history" class="nav-link">my donations</a></li>
+        {{/if_eq}}
+
+        {{#if_eq user.role 'distributor'}}
+          <li><a href="/distributor/dashboard" class="nav-link">dashboard</a></li>
+          <li><a href="/listings" class="nav-link">browse listings</a></li>
+          <li><a href="/distributor/history" class="nav-link">pickup history</a></li>
+        {{/if_eq}}
+
+        {{#if_eq user.role 'volunteer'}}
+          <li><a href="/volunteer/dashboard" class="nav-link">my assignments</a></li>
+        {{/if_eq}}
+
+        {{#if_eq user.role 'admin'}}
+          <li><a href="/admin/dashboard" class="nav-link">dashboard</a></li>
+          <li><a href="/admin/users" class="nav-link">users</a></li>
+          <li><a href="/admin/complaints" class="nav-link">complaints</a></li>
+          <li><a href="/admin/audit-log" class="nav-link">audit log</a></li>
+        {{/if_eq}}
+
+        <li><a href="/notifications" class="nav-link nav-link--notifications" aria-label="notifications">
+          &#128276;
+          {{#if unreadCount}}
+            <span class="notif-badge" aria-label="{{unreadCount}} unread notifications">{{unreadCount}}</span>
+          {{/if}}
+        </a></li>
+
+        <li><a href="/signout" class="nav-link nav-link--signout">sign out</a></li>
+
+      {{else}}
+
+        <li><a href="/login" class="nav-link">sign in</a></li>
+        <li><a href="/signup" class="nav-link nav-link--cta">get started</a></li>
+
+      {{/if}}
+
+    </ul>
+  </div>
+</nav>

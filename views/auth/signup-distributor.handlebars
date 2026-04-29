@@ -1,0 +1,296 @@
+<div class="auth-wrapper">
+  <div class="auth-card auth-card--wide">
+
+    <div class="auth-header">
+      <a href="/signup" class="back-link">&larr; back to role selection</a>
+      <h1 class="auth-title">register as a distributor</h1>
+      <p class="auth-subtitle">
+        nonprofit and community organizations claim food listings and
+        coordinate pickups through this account type
+      </p>
+    </div>
+
+    {{#if errorMessage}}
+      <div class="flash-message flash-message--error" role="alert">
+        <span class="flash-text">{{errorMessage}}</span>
+      </div>
+    {{/if}}
+
+    <form class="auth-form form-stack" action="/signup/distributor" method="POST" novalidate>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">personal information</legend>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="firstName">
+              first name
+            </label>
+            <input
+              class="form-input"
+              type="text"
+              id="firstName"
+              name="firstName"
+              placeholder="Maria"
+              autocomplete="given-name"
+              required
+              value="{{prevData.firstName}}"
+            />
+            <span class="form-error" id="firstName-error" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label--required" for="lastName">
+              last name
+            </label>
+            <input
+              class="form-input"
+              type="text"
+              id="lastName"
+              name="lastName"
+              placeholder="Garcia"
+              autocomplete="family-name"
+              required
+              value="{{prevData.lastName}}"
+            />
+            <span class="form-error" id="lastName-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="email">
+            email address
+          </label>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="maria@communityfoodbank.org"
+            autocomplete="email"
+            required
+            value="{{prevData.email}}"
+          />
+          <span class="form-error" id="email-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="phoneNumber">
+            phone number
+          </label>
+          <input
+            class="form-input"
+            type="tel"
+            id="phoneNumber"
+            name="phoneNumber"
+            placeholder="212-555-0100"
+            autocomplete="tel"
+            required
+            value="{{prevData.phoneNumber}}"
+          />
+          <span class="form-error" id="phoneNumber-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">organization information</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="organizationName">
+            organization name
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="organizationName"
+            name="organizationName"
+            placeholder="Community Food Bank of NYC"
+            required
+            value="{{prevData.organizationName}}"
+          />
+          <span class="form-error" id="organizationName-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="einNumber">
+            EIN number
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="einNumber"
+            name="einNumber"
+            placeholder="12-3456789"
+            required
+            value="{{prevData.einNumber}}"
+          />
+          <span class="form-hint">
+            your organization's Employer Identification Number, used to
+            verify 501(c)(3) status against the IRS database
+          </span>
+          <span class="form-error" id="einNumber-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tags">
+            food preferences
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="tags"
+            name="tags"
+            placeholder="halal, kosher, vegetarian (comma separated)"
+            value="{{prevData.tags}}"
+          />
+          <span class="form-hint">
+            helps the platform surface listings that match your
+            community's dietary needs
+          </span>
+        </div>
+
+      </fieldset>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">organization address</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="street">
+            street address
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="street"
+            name="street"
+            placeholder="250 Broadway"
+            autocomplete="street-address"
+            required
+            value="{{prevData.street}}"
+          />
+          <span class="form-error" id="street-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="city">city</label>
+            <input
+              class="form-input"
+              type="text"
+              id="city"
+              name="city"
+              placeholder="New York"
+              autocomplete="address-level2"
+              required
+              value="{{prevData.city}}"
+            />
+            <span class="form-error" id="city-error" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label--required" for="state">state</label>
+            <input
+              class="form-input"
+              type="text"
+              id="state"
+              name="state"
+              placeholder="NY"
+              maxlength="2"
+              autocomplete="address-level1"
+              required
+              value="{{prevData.state}}"
+            />
+            <span class="form-error" id="state-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="zipCode">
+            zip code
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="zipCode"
+            name="zipCode"
+            placeholder="10007"
+            maxlength="5"
+            autocomplete="postal-code"
+            required
+            value="{{prevData.zipCode}}"
+          />
+          <span class="form-error" id="zipCode-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">account security</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="password">
+            password
+          </label>
+          <div class="input-password-wrap">
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="at least 12 characters"
+              autocomplete="new-password"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              aria-label="show password"
+              data-target="password"
+            >&#128065;</button>
+          </div>
+          <span class="form-hint">
+            must be at least 12 characters with uppercase, lowercase,
+            a number, and a special character
+          </span>
+          <span class="form-error" id="password-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="confirmPassword">
+            confirm password
+          </label>
+          <div class="input-password-wrap">
+            <input
+              class="form-input"
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="repeat your password"
+              autocomplete="new-password"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              aria-label="show confirm password"
+              data-target="confirmPassword"
+            >&#128065;</button>
+          </div>
+          <span class="form-error" id="confirmPassword-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary btn-lg auth-submit">
+        create distributor account
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      <p>already have an account? <a href="/login">sign in</a></p>
+    </div>
+
+  </div>
+</div>

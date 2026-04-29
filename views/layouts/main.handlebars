@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SurplusConnect - connecting food businesses with nonprofits to reduce food waste in NYC" />
+    <title>{{#if pageTitle}}{{pageTitle}} | SurplusConnect{{else}}SurplusConnect{{/if}}</title>
+    <link rel="stylesheet" href="/public/css/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="{{#if user}}logged-in{{else}}logged-out{{/if}}">
+
+    {{> navbar}}
+
+    {{#if successMessage}}
+      {{> flash-message type="success" message=successMessage}}
+    {{/if}}
+    {{#if errorMessage}}
+      {{> flash-message type="error" message=errorMessage}}
+    {{/if}}
+
+    <main id="main-content" class="site-main">
+      {{{body}}}
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-brand">SurplusConnect</p>
+        <p class="footer-tagline">connecting surplus food with the people who need it most</p>
+        <p class="footer-copy">&copy; 2026 SurplusConnect &mdash; CS 546 Group 4</p>
+      </div>
+    </footer>
+
+    <script src="/public/js/main.js"></script>
+    <script src="/public/js/listing-timer.js"></script>
+    {{#if pageScripts}}
+      {{#each pageScripts}}
+        <script src="{{this}}"></script>
+      {{/each}}
+    {{/if}}
+
+  </body>
+</html>

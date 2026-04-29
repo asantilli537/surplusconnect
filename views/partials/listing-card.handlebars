@@ -1,0 +1,94 @@
+<article
+  class="listing-card listing-card--{{listing.status}}"
+  data-expiration="{{listing.expirationTime}}"
+  data-listing-id="{{listing._id}}"
+  aria-label="listing: {{listing.title}}"
+>
+
+  <div class="listing-card-header">
+    <div class="listing-card-meta">
+      <span class="badge badge-{{listing.status}}">{{listing.status}}</span>
+      <span class="listing-category">{{listing.foodCategory}}</span>
+    </div>
+    <div
+      class="listing-timer"
+      aria-live="polite"
+      aria-label="time remaining for this listing"
+    >
+      calculating...
+    </div>
+  </div>
+
+  <div class="listing-card-body">
+    <h3 class="listing-title">{{listing.title}}</h3>
+    <p class="listing-description">{{listing.description}}</p>
+
+    <ul class="listing-items" aria-label="food items in this listing">
+      {{#each listing.items}}
+        <li class="listing-item">
+          <span class="listing-item-name">{{this.name}}</span>
+          <span class="listing-item-qty">
+            {{this.quantity}} {{this.unit}}
+          </span>
+        </li>
+      {{/each}}
+    </ul>
+
+    <div class="listing-pickup-info">
+      <span class="pickup-label">pickup window</span>
+      <span class="pickup-time">
+        {{listing.pickupStartTime}} &mdash; {{listing.pickupEndTime}}
+      </span>
+    </div>
+
+    <div class="listing-location">
+      <span class="location-text">
+        {{listing.pickupAddress.street}},
+        {{listing.pickupAddress.city}},
+        {{listing.pickupAddress.state}}
+      </span>
+    </div>
+  </div>
+
+  {{!-- action buttons shown differently depending on who is viewing --}}
+  {{#if showActions}}
+    <div class="listing-card-footer">
+      {{#if_eq listing.status 'active'}}
+        
+          href="/listings/{{listing._id}}/edit"
+          class="btn btn-ghost btn-sm"
+        >
+          edit
+        </a>
+        <form
+          action="/listings/{{listing._id}}/delete"
+          method="POST"
+          class="inline-form"
+          onsubmit="return confirm('are you sure you want to delete this listing?')"
+        >
+          <button type="submit" class="btn btn-danger btn-sm">
+            delete
+          </button>
+        </form>
+      {{/if_eq}}
+
+      {{#if_eq listing.status 'claimed'}}
+        <span class="listing-claimed-note">
+          claimed &mdash; awaiting pickup
+        </span>
+      {{/if_eq}}
+    </div>
+  {{/if}}
+
+  {{#if showClaimButton}}
+    <div class="listing-card-footer">
+      
+        href="/listings/{{listing._id}}"
+        class="btn btn-primary btn-sm"
+      >
+        view and claim
+      </a>
+    </div>
+  {{/if}}
+
+</article>

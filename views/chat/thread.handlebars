@@ -1,0 +1,100 @@
+<div class="chat-page-wrap">
+
+  <div class="chat-header">
+    <div class="chat-header-inner">
+      <a href="/distributor/dashboard" class="back-link">
+        &larr; back to dashboard
+      </a>
+      <h1 class="chat-title">pickup coordination</h1>
+      <p class="chat-subtitle">
+        transaction #{{thread.transactionId}}
+        {{#if thread.isReadOnly}}
+          <span class="badge badge-cancelled" style="margin-left: var(--space-2);">
+            read only
+          </span>
+        {{/if}}
+      </p>
+    </div>
+  </div>
+
+  <div class="chat-layout">
+
+    <div class="chat-main">
+
+      {{!-- message feed --}}
+      <div
+        class="message-feed"
+        id="message-feed"
+        role="log"
+        aria-live="polite"
+        aria-label="chat messages"
+        data-transaction-id="{{thread.transactionId}}"
+        data-current-user="{{user._id}}"
+        data-readonly="{{thread.isReadOnly}}"
+      >
+        {{#if thread.messages.length}}
+          {{#each thread.messages}}
+            <div
+              class="message-bubble {{#if_eq this.senderId ../user._id}}message-bubble--mine{{else}}message-bubble--theirs{{/if_eq}}"
+              data-message-id="{{this._id}}"
+              data-timestamp="{{this.timestamp}}"
+            >
+              <span class="message-sender">{{this.senderName}}</span>
+              <p class="message-text">{{this.content}}</p>
+              <span class="message-time">{{this.timestamp}}</span>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="chat-empty" id="chat-empty">
+            <p>no messages yet. send the first one below.</p>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- message input --}}
+      {{#unless thread.isReadOnly}}
+        <div class="chat-input-area">
+          <form
+            class="chat-form"
+            id="chat-form"
+            novalidate
+            aria-label="send a message"
+          >
+            <div class="chat-input-row">
+              <label class="sr-only" for="message-input">
+                type your message
+              </label>
+              <textarea
+                class="form-textarea chat-textarea"
+                id="message-input"
+                name="content"
+                placeholder="type a message..."
+                rows="2"
+                maxlength="1000"
+                required
+                aria-describedby="message-hint"
+              ></textarea>
+              <button
+                type="submit"
+                class="btn btn-primary chat-send-btn"
+                id="chat-send-btn"
+              >
+                send
+              </button>
+            </div>
+            <span class="form-hint" id="message-hint">
+              press enter to send, shift+enter for a new line
+            </span>
+            <span class="form-error" id="chat-error" aria-live="polite"></span>
+          </form>
+        </div>
+      {{else}}
+        <div class="chat-readonly-notice">
+          this conversation is locked because the transaction has been completed
+        </div>
+      {{/unless}}
+
+    </div>
+
+  </div>
+</div>

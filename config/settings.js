@@ -1,4 +1,5 @@
-export const mongoConfig = {
-  serverUrl: 'mongodb://localhost:27017/',
-  database: 'surplusconnect'
+
+export const dbSettings = {
+  serverUrl: 'mongodb://localhost:27017',
+  dbName: 'surplusconnect',
 };
