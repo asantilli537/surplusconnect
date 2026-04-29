@@ -1,0 +1,125 @@
+<div class="container">
+  <div class="complaint-detail-wrap">
+
+    <a href="/admin/complaints" class="back-link" style="display:inline-block; margin-bottom: var(--space-6);">
+      &larr; back to complaints
+    </a>
+
+    <div class="complaint-detail-grid">
+
+      <div class="complaint-main">
+
+        <div class="card">
+          <div class="card-header">
+            <h1 class="card-title">complaint details</h1>
+            <span class="badge badge-{{complaint.status}}">
+              {{complaint.status}}
+            </span>
+          </div>
+          <div class="card-body">
+            <dl class="detail-list" style="grid-template-columns: 140px 1fr;">
+              <dt class="detail-term">filed on</dt>
+              <dd class="detail-value">{{complaint.date}}</dd>
+
+              <dt class="detail-term">listing id</dt>
+              <dd class="detail-value">{{complaint.listingId}}</dd>
+
+              <dt class="detail-term">transaction id</dt>
+              <dd class="detail-value">{{complaint.transactionId}}</dd>
+
+              <dt class="detail-term">donor</dt>
+              <dd class="detail-value">{{complaint.donorId}}</dd>
+
+              <dt class="detail-term">distributor</dt>
+              <dd class="detail-value">{{complaint.distributorId}}</dd>
+
+              <dt class="detail-term">complaint</dt>
+              <dd class="detail-value complaint-body">
+                {{complaint.complaint}}
+              </dd>
+            </dl>
+          </div>
+        </div>
+
+        {{!-- chat thread link if transaction exists --}}
+        {{#if complaint.transactionId}}
+          <div class="card" style="margin-top: var(--space-4);">
+            <div class="card-header">
+              <h2 class="card-title">related chat thread</h2>
+            </div>
+            <div class="card-body">
+              <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-4);">
+                review the conversation between both parties for this transaction
+              </p>
+              
+                href="/chat/{{complaint.transactionId}}"
+                class="btn btn-secondary btn-sm"
+              >
+                view chat thread
+              </a>
+            </div>
+          </div>
+        {{/if}}
+
+      </div>
+
+      {{!-- action sidebar --}}
+      <aside class="complaint-sidebar">
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">admin actions</h2>
+          </div>
+          <div class="card-body" style="display:flex; flex-direction:column; gap: var(--space-3);">
+
+            {{#if_eq complaint.isResolved false}}
+              <form
+                action="/admin/complaints/{{complaint._id}}/resolve"
+                method="POST"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  style="width:100%;"
+                >
+                  mark as resolved
+                </button>
+              </form>
+            {{/if_eq}}
+
+            <form
+              action="/admin/users/{{complaint.donorId}}/suspend"
+              method="POST"
+              onsubmit="return confirm('suspend donor account?')"
+            >
+              <button
+                type="submit"
+                class="btn btn-danger"
+                style="width:100%;"
+              >
+                suspend donor
+              </button>
+            </form>
+
+            <form
+              action="/admin/users/{{complaint.distributorId}}/suspend"
+              method="POST"
+              onsubmit="return confirm('suspend distributor account?')"
+            >
+              <button
+                type="submit"
+                class="btn btn-danger"
+                style="width:100%;"
+              >
+                suspend distributor
+              </button>
+            </form>
+
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,139 @@
+<div class="container">
+  <div class="listing-detail-wrap">
+
+    <a href="/listings" class="back-link" style="display:inline-block; margin-bottom: var(--space-6);">
+      &larr; back to listings
+    </a>
+
+    {{#if errorMessage}}
+      <div class="flash-message flash-message--error" role="alert">
+        <span class="flash-text">{{errorMessage}}</span>
+      </div>
+    {{/if}}
+
+    <div class="listing-detail-grid">
+
+      {{!-- main content --}}
+      <div class="listing-detail-main">
+
+        <div class="listing-detail-header">
+          <div class="listing-detail-meta">
+            <span class="badge badge-{{listing.status}}">{{listing.status}}</span>
+            <span class="listing-category">{{listing.foodCategory}}</span>
+          </div>
+          <h1 class="listing-detail-title">{{listing.title}}</h1>
+          <p class="listing-detail-description">{{listing.description}}</p>
+        </div>
+
+        {{!-- food items breakdown --}}
+        <div class="card" style="margin-top: var(--space-6);">
+          <div class="card-header">
+            <h2 class="card-title">food items</h2>
+          </div>
+          <div class="card-body">
+            <ul class="detail-items-list" aria-label="items in this listing">
+              {{#each listing.items}}
+                <li class="detail-item-row">
+                  <span class="detail-item-name">{{this.name}}</span>
+                  <span class="detail-item-qty">
+                    {{this.quantity}} {{this.unit}}
+                  </span>
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+
+        {{!-- pickup notes if any --}}
+        {{#if listing.notes}}
+          <div class="card" style="margin-top: var(--space-4);">
+            <div class="card-header">
+              <h2 class="card-title">pickup notes from donor</h2>
+            </div>
+            <div class="card-body">
+              <p class="listing-notes-text">{{listing.notes}}</p>
+            </div>
+          </div>
+        {{/if}}
+
+      </div>
+
+      {{!-- sidebar --}}
+      <aside class="listing-detail-sidebar">
+
+        <div class="card sidebar-card">
+          <div class="card-header">
+            <h2 class="card-title">pickup details</h2>
+          </div>
+          <div class="card-body">
+            <dl class="detail-list">
+
+              <dt class="detail-term">pickup window</dt>
+              <dd class="detail-value">
+                {{listing.pickupStartTime}} &mdash; {{listing.pickupEndTime}}
+              </dd>
+
+              <dt class="detail-term">expires at</dt>
+              <dd
+                class="detail-value listing-timer"
+                data-expiration="{{listing.expirationTime}}"
+                aria-live="polite"
+              >
+                calculating...
+              </dd>
+
+              <dt class="detail-term">location</dt>
+              <dd class="detail-value">
+                {{listing.pickupAddress.street}}<br />
+                {{listing.pickupAddress.city}},
+                {{listing.pickupAddress.state}}
+                {{listing.pickupAddress.zipCode}}
+              </dd>
+
+            </dl>
+          </div>
+
+          {{#if canClaim}}
+            <div class="card-footer">
+              <form action="/listings/{{listing._id}}/claim" method="POST" style="width:100%;">
+                <button type="submit" class="btn btn-primary" style="width:100%;">
+                  claim this listing
+                </button>
+              </form>
+            </div>
+          {{else}}
+            <div class="card-footer">
+              <p class="listing-claimed-note" style="width:100%; text-align:center;">
+                this listing has already been claimed
+              </p>
+            </div>
+          {{/if}}
+
+        </div>
+
+        {{!-- donor info --}}
+        <div class="card sidebar-card" style="margin-top: var(--space-4);">
+          <div class="card-header">
+            <h2 class="card-title">about the donor</h2>
+          </div>
+          <div class="card-body">
+            <dl class="detail-list">
+              <dt class="detail-term">business</dt>
+              <dd class="detail-value">{{listing.donorOrganization}}</dd>
+              <dt class="detail-term">food tags</dt>
+              <dd class="detail-value">
+                {{#if listing.donorTags}}
+                  {{listing.donorTags}}
+                {{else}}
+                  <span class="text-muted">none listed</span>
+                {{/if}}
+              </dd>
+            </dl>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+</div>

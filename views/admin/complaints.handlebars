@@ -1,0 +1,66 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">complaints</h1>
+      <p class="page-subtitle">
+        review and resolve reported issues between platform users
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="browse-controls">
+    <form class="filter-form" method="GET" action="/admin/complaints">
+      <div class="filter-group">
+        <label class="filter-label" for="status">status</label>
+        <select class="form-select filter-select" id="status" name="status">
+          <option value="">all</option>
+          <option value="open"          {{#if_eq filterStatus 'open'}}selected{{/if_eq}}>open</option>
+          <option value="investigation" {{#if_eq filterStatus 'investigation'}}selected{{/if_eq}}>under investigation</option>
+          <option value="resolved"      {{#if_eq filterStatus 'resolved'}}selected{{/if_eq}}>resolved</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">filter</button>
+      {{#if filterStatus}}
+        <a href="/admin/complaints" class="btn btn-ghost btn-sm">clear</a>
+      {{/if}}
+    </form>
+  </div>
+
+  {{#if hasComplaints}}
+    <div class="admin-list admin-list--full">
+      {{#each complaints}}
+        
+          href="/admin/complaints/{{this._id}}"
+          class="admin-list-item admin-list-item--complaint"
+        >
+          <div class="admin-list-item-main">
+            <span class="admin-list-title">{{this.complaint}}</span>
+            <span class="admin-list-meta">
+              filed on {{this.date}} &mdash;
+              donor: {{this.donorId}} &mdash;
+              distributor: {{this.distributorId}}
+            </span>
+          </div>
+          <div class="admin-list-item-right">
+            <span class="badge badge-{{this.status}}">{{this.status}}</span>
+            <span class="admin-list-arrow" aria-hidden="true">&rsaquo;</span>
+          </div>
+        </a>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state empty-state--large">
+      <p class="empty-state-text">
+        {{#if filterStatus}}
+          no complaints with this status
+        {{else}}
+          no complaints have been filed yet
+        {{/if}}
+      </p>
+    </div>
+  {{/if}}
+
+</div>

@@ -1,0 +1,78 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">audit log</h1>
+      <p class="page-subtitle">
+        a full record of every admin action taken on the platform
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="browse-controls">
+    <form class="filter-form" method="GET" action="/admin/audit-log">
+      <div class="filter-group">
+        <label class="filter-label" for="action">action type</label>
+        <select class="form-select filter-select" id="action" name="action">
+          <option value="">all actions</option>
+          <option value="suspend_account"   {{#if_eq filterAction 'suspend_account'}}selected{{/if_eq}}>account suspended</option>
+          <option value="unsuspend_account" {{#if_eq filterAction 'unsuspend_account'}}selected{{/if_eq}}>account unsuspended</option>
+          <option value="resolve_complaint" {{#if_eq filterAction 'resolve_complaint'}}selected{{/if_eq}}>complaint resolved</option>
+          <option value="status_override"   {{#if_eq filterAction 'status_override'}}selected{{/if_eq}}>status override</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">filter</button>
+      {{#if filterAction}}
+        <a href="/admin/audit-log" class="btn btn-ghost btn-sm">clear</a>
+      {{/if}}
+    </form>
+  </div>
+
+  {{#if hasLogs}}
+    <div class="history-table-wrap card">
+      <table class="history-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col">action</th>
+            <th scope="col">performed by</th>
+            <th scope="col">target user</th>
+            <th scope="col">description</th>
+            <th scope="col">timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each auditLogs}}
+            <tr class="history-row">
+              <td>
+                <span class="audit-action-tag">{{this.action}}</span>
+              </td>
+              <td>{{this.adminId}}</td>
+              <td>
+                {{#if this.targetUserId}}
+                  {{this.targetUserId}}
+                {{else}}
+                  <span class="text-muted">n/a</span>
+                {{/if}}
+              </td>
+              <td class="audit-description">{{this.description}}</td>
+              <td class="audit-timestamp">{{this.timestamp}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div class="empty-state empty-state--large">
+      <p class="empty-state-text">
+        {{#if filterAction}}
+          no log entries found for this action type
+        {{else}}
+          no admin actions have been recorded yet
+        {{/if}}
+      </p>
+    </div>
+  {{/if}}
+
+</div>

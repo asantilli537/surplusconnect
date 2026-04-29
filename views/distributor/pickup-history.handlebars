@@ -1,0 +1,80 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">pickup history</h1>
+      <p class="page-subtitle">
+        every listing your organization has claimed and picked up
+      </p>
+    </div>
+    <a href="/distributor/dashboard" class="btn btn-ghost">
+      &larr; back to dashboard
+    </a>
+  </div>
+</div>
+
+<div class="container">
+
+  {{#if hasPastPickups}}
+    <div class="history-table-wrap card">
+      <table class="history-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col">listing</th>
+            <th scope="col">donor</th>
+            <th scope="col">food category</th>
+            <th scope="col">items</th>
+            <th scope="col">claimed on</th>
+            <th scope="col">completed on</th>
+            <th scope="col">status</th>
+            <th scope="col">receipt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each pastPickups}}
+            <tr class="history-row">
+              <td class="history-title">{{this.title}}</td>
+              <td>{{this.donorName}}</td>
+              <td>{{this.foodCategory}}</td>
+              <td>{{this.itemCount}} items</td>
+              <td>{{this.createdOn}}</td>
+              <td>
+                {{#if this.completedOn}}
+                  {{this.completedOn}}
+                {{else}}
+                  <span class="text-muted">pending</span>
+                {{/if}}
+              </td>
+              <td>
+                <span class="badge badge-{{this.status}}">
+                  {{this.status}}
+                </span>
+              </td>
+              <td>
+                {{#if_eq this.status 'delivered'}}
+                  
+                    href="/receipts/{{this.receiptId}}"
+                    class="btn btn-ghost btn-sm"
+                  >
+                    view
+                  </a>
+                {{else}}
+                  <span class="text-muted">n/a</span>
+                {{/if_eq}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div class="empty-state empty-state--large">
+      <p class="empty-state-text">
+        no pickups on record yet. claim a listing to get started.
+      </p>
+      <a href="/listings" class="btn btn-primary">
+        browse listings
+      </a>
+    </div>
+  {{/if}}
+
+</div>
