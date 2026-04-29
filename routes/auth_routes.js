@@ -95,8 +95,10 @@ router.route('/signup/volunteer')
 // ---- signout ----
 
 router.route('/signout').get(async (req, res) => {
-  req.session.destroy();
-  return res.redirect('/');
+  req.session.destroy((err) => {
+    if (err) console.error('session destroy error:', err);
+    return res.redirect('/');
+  });
 });
 
 // ---- notifications ----
