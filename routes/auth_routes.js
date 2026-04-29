@@ -9,6 +9,19 @@ import * as helpers from "../helpers.js";
 
 router.route("/").get(async (req, res) => {
   // Code for root route
+    if (req.session.user) {
+    const role = req.session.user.role;
+    if (role === 'donor') return res.redirect('/donor/dashboard');
+    if (role === 'distributor') return res.redirect('/distributor/dashboard');
+    if (role === 'volunteer') return res.redirect('/volunteer/dashboard');
+    if (role === 'admin') return res.redirect('/admin/dashboard');
+  }
+
+  // not logged in, showing the landing page
+  return res.render('home', {
+    pageTitle: 'Welcome',
+    user: req.session.user || null,
+  });
 });
 
 router

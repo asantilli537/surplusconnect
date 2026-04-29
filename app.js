@@ -24,6 +24,12 @@ app.engine(
     layoutsDir: path.join(__dirname, 'views/layouts'),
     defaultLayout: 'main',
     partialsDir: path.join(__dirname, 'views/partials'),
+    helpers: {
+      // checking equality between two values in templates
+      if_eq(a, b, opts) {
+        return a === b ? opts.fn(this) : opts.inverse(this);
+      },
+    },
   })
 );
 app.set('view engine', 'handlebars');
