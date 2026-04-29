@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="SurplusConnect - connecting food businesses with nonprofits to reduce food waste in NYC" />
+    <link rel="icon" href="/public/favicon.ico" type="image/x-icon" />
     <title>{{#if pageTitle}}{{pageTitle}} | SurplusConnect{{else}}SurplusConnect{{/if}}</title>
     <link rel="stylesheet" href="/public/css/main.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,7 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="{{#if user}}logged-in{{else}}logged-out{{/if}}">
-
+    <noscript>
+        <div class="flash-message flash-message--error" role="alert">
+            <span class="flash-text">
+            javascript is disabled in your browser. some features of
+            SurplusConnect require javascript to work correctly.
+            </span>
+        </div>
+    </noscript>
     {{> navbar}}
 
     {{#if successMessage}}
@@ -34,7 +42,6 @@
     </footer>
 
     <script src="/public/js/main.js"></script>
-    <script src="/public/js/listing-timer.js"></script>
     {{#if pageScripts}}
       {{#each pageScripts}}
         <script src="{{this}}"></script>
