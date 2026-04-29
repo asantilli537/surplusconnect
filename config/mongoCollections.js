@@ -16,6 +16,6 @@ const getCollectionFn = (collection) => {
 };
 
 export const listings = getCollectionFn('listings');
-export const trasactions = getCollectionFn('transactions');
+export const transactions = getCollectionFn('transactions');
 export const addresses = getCollectionFn('addresses');
 export const receipts = getCollectionFn('receipts');
