@@ -1,0 +1,159 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">edit listing</h1>
+      <p class="page-subtitle">
+        update the details for this donation listing
+      </p>
+    </div>
+    <a href="/donor/dashboard" class="btn btn-ghost">
+      &larr; back to dashboard
+    </a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-page-wrap">
+
+    {{#if errorMessage}}
+      <div class="flash-message flash-message--error" role="alert">
+        <span class="flash-text">{{errorMessage}}</span>
+      </div>
+    {{/if}}
+
+    <form
+      class="form-stack"
+      action="/listings/{{listing._id}}/edit"
+      method="POST"
+      novalidate
+      id="listing-form"
+    >
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">listing details</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="title">
+            listing title
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="title"
+            name="title"
+            required
+            maxlength="100"
+            value="{{listing.title}}"
+          />
+          <span class="form-error" id="title-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">description</label>
+          <textarea
+            class="form-textarea"
+            id="description"
+            name="description"
+            rows="3"
+          >{{listing.description}}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="foodCategory">
+            food category
+          </label>
+          <select
+            class="form-select"
+            id="foodCategory"
+            name="foodCategory"
+            required
+          >
+            <option value="">select a category</option>
+            <option value="bakery"    {{#if_eq listing.foodCategory 'bakery'}}selected{{/if_eq}}>bakery</option>
+            <option value="produce"   {{#if_eq listing.foodCategory 'produce'}}selected{{/if_eq}}>produce</option>
+            <option value="dairy"     {{#if_eq listing.foodCategory 'dairy'}}selected{{/if_eq}}>dairy</option>
+            <option value="prepared"  {{#if_eq listing.foodCategory 'prepared'}}selected{{/if_eq}}>prepared meals</option>
+            <option value="meat"      {{#if_eq listing.foodCategory 'meat'}}selected{{/if_eq}}>meat and poultry</option>
+            <option value="pantry"    {{#if_eq listing.foodCategory 'pantry'}}selected{{/if_eq}}>pantry items</option>
+            <option value="beverages" {{#if_eq listing.foodCategory 'beverages'}}selected{{/if_eq}}>beverages</option>
+            <option value="other"     {{#if_eq listing.foodCategory 'other'}}selected{{/if_eq}}>other</option>
+          </select>
+          <span class="form-error" id="foodCategory-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="notes">pickup notes</label>
+          <textarea
+            class="form-textarea"
+            id="notes"
+            name="notes"
+            rows="2"
+          >{{listing.notes}}</textarea>
+        </div>
+
+      </fieldset>
+
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">pickup timing</legend>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="pickupStartTime">
+              pickup window start
+            </label>
+            <input
+              class="form-input"
+              type="datetime-local"
+              id="pickupStartTime"
+              name="pickupStartTime"
+              required
+              value="{{listing.pickupStartTime}}"
+            />
+            <span class="form-error" id="pickupStartTime-error" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label--required" for="pickupEndTime">
+              pickup window end
+            </label>
+            <input
+              class="form-input"
+              type="datetime-local"
+              id="pickupEndTime"
+              name="pickupEndTime"
+              required
+              value="{{listing.pickupEndTime}}"
+            />
+            <span class="form-error" id="pickupEndTime-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="expirationTime">
+            food expires at
+          </label>
+          <input
+            class="form-input"
+            type="datetime-local"
+            id="expirationTime"
+            name="expirationTime"
+            required
+            value="{{listing.expirationTime}}"
+          />
+          <span class="form-error" id="expirationTime-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">
+          save changes
+        </button>
+        <a href="/donor/dashboard" class="btn btn-ghost btn-lg">
+          cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
