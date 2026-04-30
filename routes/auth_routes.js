@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireGuest } from '../middleware.js';
 import { createUser, loginUser } from '../data/users.js';
+import { getNotificationsForUser, markAllAsRead } from '../data/notifications.js';
 
 const router = Router();
 
@@ -265,19 +266,24 @@ router.route('/notifications').get(async (req, res) => {
   if (!req.session.user) return res.redirect('/login');
 
   try {
-    const notifications = [];
+    const notifications = await getNotificationsForUser(req.session.user._id);
+
+    // marking everything as read when the user opens this page
+    await markAllAsRead(req.session.user._id);
+
+    const unreadCount = 0;
 
     return res.render('notifications/index', {
-      pageTitle:     'Notifications',
-      user:          req.session.user,
+      pageTitle: 'Notifications',
+      user:      req.session.user,
       notifications,
-      unreadCount:   0,
+      unreadCount,
     });
   } catch (e) {
     return res.status(500).render('error', {
       pageTitle: 'Error',
-      user: req.session.user,
-      error: e.message,
+      user:      req.session.user,
+      error:     e.message,
     });
   }
 });

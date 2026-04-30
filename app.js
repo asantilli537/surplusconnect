@@ -6,22 +6,23 @@ import session from 'express-session';
 import { engine } from 'express-handlebars';
 
 import configRoutes from './routes/index.js';
+import { getUnreadCount } from './data/notifications.js';
 
 /*
-  __dirname isn't available in ES Modules so we're reconstructing it from
-  import.meta.url. this is needed for all the path.join calls below.
+  __dirname isn't available in ES Modules so we're reconstructing it
+  from import.meta.url. needed for all the path.join calls below.
 */
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
-const app = express();
+const app  = express();
 const PORT = 3000;
 
 // setting up handlebars as the view engine
 app.engine(
   'handlebars',
   engine({
-    layoutsDir: path.join(__dirname, 'views/layouts'),
+    layoutsDir:  path.join(__dirname, 'views/layouts'),
     defaultLayout: 'main',
     partialsDir: path.join(__dirname, 'views/partials'),
     helpers: {
@@ -40,6 +41,7 @@ app.engine(
     },
   })
 );
+
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -54,7 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    name: 'SurplusConnectSession',
+    name:   'SurplusConnectSession',
     secret: 'surplusconnect_secret_key_cs546',
     resave: false,
     saveUninitialized: false,
@@ -62,6 +64,28 @@ app.use(
     cookie: { maxAge: 1000 * 60 * 60 * 8 },
   })
 );
+
+// ---- global middleware ----
+
+/*
+  attaching the unread notification count to every request so
+  the navbar bell badge always shows the right number without
+  each individual route having to pass it manually.
+  wrapping in try/catch so a db blip never crashes an unrelated page.
+*/
+app.use(async (req, res, next) => {
+  if (req.session.user) {
+    try {
+      res.locals.unreadCount = await getUnreadCount(req.session.user._id);
+    } catch (e) {
+      // not blocking the request if notification count fails
+      res.locals.unreadCount = 0;
+    }
+  } else {
+    res.locals.unreadCount = 0;
+  }
+  next();
+});
 
 // ---- routes and server boot ----
 
