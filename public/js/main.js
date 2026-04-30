@@ -121,3 +121,20 @@ if (itemsContainer && addItemBtn) {
     row.querySelector('input[type="text"]').focus();
   });
 }
+
+// ---- password show/hide toggle ----
+
+document.querySelectorAll('.password-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const input    = document.getElementById(targetId);
+    if (!input) return;
+
+    // switching between password and text type
+    const isHidden = input.type === 'password';
+    input.type     = isHidden ? 'text' : 'password';
+
+    // updating the aria label so screen readers know the state
+    btn.setAttribute('aria-label', isHidden ? 'hide password' : 'show password');
+  });
+});

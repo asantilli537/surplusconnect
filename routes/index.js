@@ -17,6 +17,7 @@ const constructorMethod = (app) => {
     return res.status(404).render('error', {
       pageTitle: 'Not Found',
       user: req.session.user || null,
+      status: 404,
       error: 'page not found',
     });
   });

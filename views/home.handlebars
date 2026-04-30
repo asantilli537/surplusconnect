@@ -1,8 +1,101 @@
+{{!-- hero section --}}
 <section class="hero">
-  <h1 class="hero-title">good food should never go to waste</h1>
-  <p class="hero-subtitle">SurplusConnect links NYC food businesses with nonprofits to get surplus food where it belongs.</p>
+  <h1 class="hero-title">
+    good food should never
+    <span>go to waste</span>
+  </h1>
+  <p class="hero-subtitle">
+    SurplusConnect links NYC food businesses with nonprofits to get
+    surplus food where it belongs, to the people who need it most.
+  </p>
   <div class="hero-actions">
-    <a href="/signup" class="btn btn-primary">get started</a>
-    <a href="/login" class="btn btn-secondary">sign in</a>
+    <a href="/signup" class="btn btn-primary btn-lg">get started</a>
+    <a href="/login"  class="btn btn-secondary btn-lg">sign in</a>
+  </div>
+</section>
+
+{{!-- how it works section --}}
+<section class="how-it-works" aria-labelledby="how-heading">
+  <div class="container">
+    <h2 class="section-heading" id="how-heading">how it works</h2>
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <span class="step-number" aria-hidden="true">01</span>
+        <h3 class="step-title">donors post surplus</h3>
+        <p class="step-desc">
+          restaurants, bakeries, and food businesses post available
+          surplus food with pickup details and expiration times.
+        </p>
+      </div>
+
+      <div class="step-card">
+        <span class="step-number" aria-hidden="true">02</span>
+        <h3 class="step-title">nonprofits claim listings</h3>
+        <p class="step-desc">
+          verified nonprofit organizations browse active listings
+          sorted by urgency and claim what their communities need.
+        </p>
+      </div>
+
+      <div class="step-card">
+        <span class="step-number" aria-hidden="true">03</span>
+        <h3 class="step-title">food gets picked up</h3>
+        <p class="step-desc">
+          both parties coordinate pickup through the platform chat.
+          donors receive an automatic tax receipt once delivery is
+          confirmed.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{{!-- roles section --}}
+<section class="roles-section" aria-labelledby="roles-heading">
+  <div class="container">
+    <h2 class="section-heading" id="roles-heading">who uses SurplusConnect</h2>
+    <div class="roles-grid">
+
+      <div class="role-overview-card">
+        <span class="role-overview-icon" aria-hidden="true">&#127968;</span>
+        <h3 class="role-overview-title">food donors</h3>
+        <p class="role-overview-desc">
+          local businesses that want to donate surplus food instead
+          of discarding it, and receive tax deduction receipts for
+          every confirmed donation.
+        </p>
+        <a href="/signup/donor" class="btn btn-secondary btn-sm">
+          register as donor
+        </a>
+      </div>
+
+      <div class="role-overview-card">
+        <span class="role-overview-icon" aria-hidden="true">&#127968;</span>
+        <h3 class="role-overview-title">distributors</h3>
+        <p class="role-overview-desc">
+          verified 501(c)(3) nonprofits and community organizations
+          that claim and distribute donated food to the people they
+          serve.
+        </p>
+        <a href="/signup/distributor" class="btn btn-secondary btn-sm">
+          register as distributor
+        </a>
+      </div>
+
+      <div class="role-overview-card">
+        <span class="role-overview-icon" aria-hidden="true">&#128663;</span>
+        <h3 class="role-overview-title">volunteer couriers</h3>
+        <p class="role-overview-desc">
+          community volunteers who help transport donations when
+          organizations do not have their own vehicles available.
+        </p>
+        <a href="/signup/volunteer" class="btn btn-secondary btn-sm">
+          register as volunteer
+        </a>
+      </div>
+
+    </div>
   </div>
 </section>

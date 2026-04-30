@@ -1,0 +1,132 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">manage users</h1>
+      <p class="page-subtitle">
+        view, filter, and moderate all registered accounts
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="browse-controls">
+    <form class="filter-form" method="GET" action="/admin/users">
+
+      <div class="filter-group">
+        <label class="filter-label" for="role">role</label>
+        <select class="form-select filter-select" id="role" name="role">
+          <option value="">all roles</option>
+          <option value="donor"       {{#if_eq filterRole 'donor'}}selected{{/if_eq}}>donor</option>
+          <option value="distributor" {{#if_eq filterRole 'distributor'}}selected{{/if_eq}}>distributor</option>
+          <option value="volunteer"   {{#if_eq filterRole 'volunteer'}}selected{{/if_eq}}>volunteer</option>
+          <option value="admin"       {{#if_eq filterRole 'admin'}}selected{{/if_eq}}>admin</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="status">status</label>
+        <select class="form-select filter-select" id="status" name="status">
+          <option value="">all statuses</option>
+          <option value="active"    {{#if_eq filterStatus 'active'}}selected{{/if_eq}}>active</option>
+          <option value="suspended" {{#if_eq filterStatus 'suspended'}}selected{{/if_eq}}>suspended</option>
+          <option value="pending"   {{#if_eq filterStatus 'pending'}}selected{{/if_eq}}>pending verification</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-secondary btn-sm">
+        apply filters
+      </button>
+
+      {{#if filterRole}}
+        <a href="/admin/users" class="btn btn-ghost btn-sm">clear</a>
+      {{/if}}
+
+    </form>
+  </div>
+
+  {{#if hasUsers}}
+    <div class="history-table-wrap card">
+      <table class="history-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col">name</th>
+            <th scope="col">email</th>
+            <th scope="col">role</th>
+            <th scope="col">organization</th>
+            <th scope="col">verified</th>
+            <th scope="col">joined</th>
+            <th scope="col">status</th>
+            <th scope="col">actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each users}}
+            <tr class="history-row">
+              <td class="history-title">
+                {{this.firstName}} {{this.lastName}}
+              </td>
+              <td>{{this.email}}</td>
+              <td>
+                <span class="badge badge-{{this.role}}">{{this.role}}</span>
+              </td>
+              <td>
+                {{#if this.organizationName}}
+                  {{this.organizationName}}
+                {{else}}
+                  <span class="text-muted">n/a</span>
+                {{/if}}
+              </td>
+              <td>
+                {{#if this.isVerified}}
+                  <span class="verified-check" aria-label="verified">&#10003;</span>
+                {{else}}
+                  <span class="text-muted">pending</span>
+                {{/if}}
+              </td>
+              <td>{{this.createdAt}}</td>
+              <td>
+                {{#if this.isSuspended}}
+                  <span class="badge badge-cancelled">suspended</span>
+                {{else}}
+                  <span class="badge badge-active">active</span>
+                {{/if}}
+              </td>
+              <td>
+                {{#if this.isSuspended}}
+                  <form
+                    action="/admin/users/{{this._id}}/unsuspend"
+                    method="POST"
+                    class="inline-form"
+                  >
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                      unsuspend
+                    </button>
+                  </form>
+                {{else}}
+                  <form
+                    action="/admin/users/{{this._id}}/suspend"
+                    method="POST"
+                    class="inline-form"
+                    onsubmit="return confirm('suspend this account?')"
+                  >
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      suspend
+                    </button>
+                  </form>
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div class="empty-state empty-state--large">
+      <p class="empty-state-text">no users found matching these filters</p>
+      <a href="/admin/users" class="btn btn-ghost btn-sm">clear filters</a>
+    </div>
+  {{/if}}
+
+</div>

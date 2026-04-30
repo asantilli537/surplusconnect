@@ -1,21 +1,22 @@
 import { Router } from 'express';
 import { requireRole } from '../middleware.js';
+
 const router = Router();
 
-router.use(requireRole('volunteer'));
+// ---- dashboard ----
 
-router.route('/volunteer/dashboard').get(async (req, res) => {
+router.route('/volunteer/dashboard').get(requireRole('volunteer'), async (req, res) => {
   try {
-    const assignedPickups   = [];
-    const completedPickups  = [];
+    const assignedPickups  = [];
+    const completedPickups = [];
 
     return res.render('volunteer/dashboard', {
-      pageTitle:            'My Assignments',
-      user:                 req.session.user,
+      pageTitle:    'My Assignments',
+      user:         req.session.user,
       assignedPickups,
       completedPickups,
-      hasAssigned:          assignedPickups.length > 0,
-      hasCompleted:         completedPickups.length > 0,
+      hasAssigned:  assignedPickups.length > 0,
+      hasCompleted: completedPickups.length > 0,
     });
   } catch (e) {
     return res.status(500).render('error', {
@@ -26,9 +27,10 @@ router.route('/volunteer/dashboard').get(async (req, res) => {
   }
 });
 
-router.route('/volunteer/pickups/:id/complete').post(async (req, res) => {
+// ---- mark pickup complete ----
+
+router.route('/volunteer/pickups/:id/complete').post(requireRole('volunteer'), async (req, res) => {
   try {
-    // markPickupComplete(req.params.id) wired in later
     return res.redirect('/volunteer/dashboard');
   } catch (e) {
     return res.status(500).render('error', {

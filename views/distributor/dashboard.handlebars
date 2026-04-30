@@ -1,0 +1,110 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">welcome back, {{user.firstName}}</h1>
+      <p class="page-subtitle">
+        manage your claimed pickups and find new listings nearby
+      </p>
+    </div>
+    <a href="/listings" class="btn btn-primary">
+      browse listings
+    </a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
+    <div class="stat-card">
+      <span class="stat-value">{{totalPickups}}</span>
+      <span class="stat-label">total pickups completed</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{activeClaimsCount}}</span>
+      <span class="stat-label">active claims right now</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{monthPickups}}</span>
+      <span class="stat-label">pickups this month</span>
+    </div>
+  </div>
+
+  {{!-- active claimed listings --}}
+  <section class="dashboard-section" aria-labelledby="claimed-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="claimed-heading">
+        your active claims
+      </h2>
+      <a href="/listings" class="btn btn-secondary btn-sm">
+        find more
+      </a>
+    </div>
+
+    {{#if hasClaimedListings}}
+      <div class="listings-grid">
+        {{#each claimedListings}}
+          {{> listing-card listing=this showClaimButton=false showActions=false}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">
+          you have no active claims right now
+        </p>
+        <a href="/listings" class="btn btn-primary btn-sm">
+          browse available listings
+        </a>
+      </div>
+    {{/if}}
+
+  </section>
+
+  {{!-- recent pickups --}}
+  <section class="dashboard-section" aria-labelledby="recent-pickups-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="recent-pickups-heading">
+        recent pickups
+      </h2>
+      <a href="/distributor/history" class="btn btn-ghost btn-sm">
+        view all
+      </a>
+    </div>
+
+    {{#if hasRecentPickups}}
+      <div class="history-table-wrap">
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">listing</th>
+              <th scope="col">donor</th>
+              <th scope="col">picked up</th>
+              <th scope="col">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each recentPickups}}
+              <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.donorName}}</td>
+                <td>{{this.completedOn}}</td>
+                <td>
+                  <span class="badge badge-{{this.status}}">
+                    {{this.status}}
+                  </span>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">
+          no completed pickups yet. claim a listing to get started.
+        </p>
+      </div>
+    {{/if}}
+
+  </section>
+
+</div>

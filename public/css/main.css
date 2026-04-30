@@ -1925,3 +1925,106 @@ select {
     padding-inline: var(--space-4);
   }
 }
+
+/* ---- how it works section ---- */
+
+.how-it-works {
+  padding: var(--space-16) 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.section-heading {
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: var(--space-10);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+.step-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.step-number {
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--color-brand-light);
+  line-height: 1;
+  border: 2px solid var(--color-brand-light);
+  border-radius: var(--radius-full);
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  color: var(--color-brand);
+}
+
+.step-title {
+  font-size: var(--text-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+}
+
+.step-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+/* ---- roles overview section ---- */
+
+.roles-section {
+  padding: var(--space-16) 0;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+.role-overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.role-overview-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.role-overview-title {
+  font-size: var(--text-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text);
+}
+
+.role-overview-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  flex: 1;
+}

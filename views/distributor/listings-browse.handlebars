@@ -1,0 +1,82 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">available listings</h1>
+      <p class="page-subtitle">
+        sorted by priority. the most urgent listings appear first.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  {{!-- filter and sort controls --}}
+  <div class="browse-controls" id="browse-controls">
+    <form class="filter-form" method="GET" action="/listings" id="filter-form">
+
+      <div class="filter-group">
+        <label class="filter-label" for="category">category</label>
+        <select class="form-select filter-select" id="category" name="category">
+          <option value="">all categories</option>
+          <option value="bakery"    {{#if_eq filterCategory 'bakery'}}selected{{/if_eq}}>bakery</option>
+          <option value="produce"   {{#if_eq filterCategory 'produce'}}selected{{/if_eq}}>produce</option>
+          <option value="dairy"     {{#if_eq filterCategory 'dairy'}}selected{{/if_eq}}>dairy</option>
+          <option value="prepared"  {{#if_eq filterCategory 'prepared'}}selected{{/if_eq}}>prepared meals</option>
+          <option value="meat"      {{#if_eq filterCategory 'meat'}}selected{{/if_eq}}>meat and poultry</option>
+          <option value="pantry"    {{#if_eq filterCategory 'pantry'}}selected{{/if_eq}}>pantry items</option>
+          <option value="beverages" {{#if_eq filterCategory 'beverages'}}selected{{/if_eq}}>beverages</option>
+          <option value="other"     {{#if_eq filterCategory 'other'}}selected{{/if_eq}}>other</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label" for="sort">sort by</label>
+        <select class="form-select filter-select" id="sort" name="sort">
+          <option value="priority"   {{#if_eq filterSort 'priority'}}selected{{/if_eq}}>priority score</option>
+          <option value="expiration" {{#if_eq filterSort 'expiration'}}selected{{/if_eq}}>expiring soonest</option>
+          <option value="quantity"   {{#if_eq filterSort 'quantity'}}selected{{/if_eq}}>largest quantity</option>
+          <option value="newest"     {{#if_eq filterSort 'newest'}}selected{{/if_eq}}>newest first</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-secondary btn-sm">
+        apply filters
+      </button>
+
+      {{#if filterCategory}}
+        <a href="/listings" class="btn btn-ghost btn-sm">
+          clear filters
+        </a>
+      {{/if}}
+
+    </form>
+  </div>
+
+  {{!-- listings grid --}}
+  {{#if hasListings}}
+    <div class="listings-grid" id="listings-grid">
+      {{#each activeListings}}
+        {{> listing-card listing=this showClaimButton=true showActions=false}}
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-state empty-state--large">
+      <p class="empty-state-text">
+        {{#if filterCategory}}
+          no active listings found for this category right now.
+          check back soon or try a different filter.
+        {{else}}
+          no active listings available right now.
+          check back soon as donors post new listings throughout the day.
+        {{/if}}
+      </p>
+      {{#if filterCategory}}
+        <a href="/listings" class="btn btn-secondary btn-sm">
+          clear filters
+        </a>
+      {{/if}}
+    </div>
+  {{/if}}
+
+</div>

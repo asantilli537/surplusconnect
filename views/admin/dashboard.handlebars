@@ -1,0 +1,135 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">admin dashboard</h1>
+      <p class="page-subtitle">
+        platform overview and moderation controls
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  {{!-- platform stats --}}
+  <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
+    <div class="stat-card">
+      <span class="stat-value">{{stats.totalUsers}}</span>
+      <span class="stat-label">registered users</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{stats.totalListings}}</span>
+      <span class="stat-label">total listings posted</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{stats.totalTransactions}}</span>
+      <span class="stat-label">completed donations</span>
+    </div>
+    <div class="stat-card stat-card--alert">
+      <span class="stat-value stat-value--alert">{{stats.openComplaints}}</span>
+      <span class="stat-label">open complaints</span>
+    </div>
+  </div>
+
+  <div class="admin-grid">
+
+    {{!-- recent complaints --}}
+    <section class="dashboard-section" aria-labelledby="complaints-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="complaints-heading">
+          recent complaints
+        </h2>
+        <a href="/admin/complaints" class="btn btn-secondary btn-sm">
+          view all
+        </a>
+      </div>
+
+      {{#if hasRecentComplaints}}
+        <div class="admin-list">
+          {{#each recentComplaints}}
+            
+              href="/admin/complaints/{{this._id}}"
+              class="admin-list-item"
+            >
+              <div class="admin-list-item-main">
+                <span class="admin-list-title">{{this.complaint}}</span>
+                <span class="admin-list-meta">{{this.date}}</span>
+              </div>
+              <span class="badge badge-{{this.status}}">
+                {{this.status}}
+              </span>
+            </a>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="empty-state">
+          <p class="empty-state-text">no open complaints right now</p>
+        </div>
+      {{/if}}
+
+    </section>
+
+    {{!-- recent audit logs --}}
+    <section class="dashboard-section" aria-labelledby="audit-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="audit-heading">
+          recent admin actions
+        </h2>
+        <a href="/admin/audit-log" class="btn btn-ghost btn-sm">
+          full log
+        </a>
+      </div>
+
+      {{#if hasRecentLogs}}
+        <div class="admin-list">
+          {{#each recentAuditLogs}}
+            <div class="admin-list-item admin-list-item--static">
+              <div class="admin-list-item-main">
+                <span class="admin-list-title">{{this.action}}</span>
+                <span class="admin-list-meta">{{this.description}}</span>
+              </div>
+              <span class="admin-list-timestamp">{{this.timestamp}}</span>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="empty-state">
+          <p class="empty-state-text">no admin actions recorded yet</p>
+        </div>
+      {{/if}}
+
+    </section>
+
+  </div>
+
+  {{!-- quick nav to all admin sections --}}
+  <section style="margin-top: var(--space-10);">
+    <div class="section-header">
+      <h2 class="section-title">admin controls</h2>
+    </div>
+    <div class="admin-controls-grid">
+      <a href="/admin/users" class="admin-control-card">
+        <span class="admin-control-icon" aria-hidden="true">&#128101;</span>
+        <span class="admin-control-label">manage users</span>
+        <span class="admin-control-desc">
+          view, suspend, or unsuspend any account
+        </span>
+      </a>
+      <a href="/admin/complaints" class="admin-control-card">
+        <span class="admin-control-icon" aria-hidden="true">&#128203;</span>
+        <span class="admin-control-label">complaints</span>
+        <span class="admin-control-desc">
+          review and resolve reported issues
+        </span>
+      </a>
+      <a href="/admin/audit-log" class="admin-control-card">
+        <span class="admin-control-icon" aria-hidden="true">&#128196;</span>
+        <span class="admin-control-label">audit log</span>
+        <span class="admin-control-desc">
+          full history of all admin actions
+        </span>
+      </a>
+    </div>
+  </section>
+
+</div>
