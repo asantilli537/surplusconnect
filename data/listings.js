@@ -4,7 +4,6 @@
 import {listings} from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import * as helpers from '../helpers.js';
-import { getEquipmentById } from '../../lab06/data/equipment.js';
 import NodeGeocoder from 'node-geocoder';
 
 
@@ -73,7 +72,7 @@ export const getListingsByDonor = async (id) => {
         status: "active"
     });
     if (!theListings) throw `getListingByDonor: Listings not found from this donor Id.`;
-    return theListings;
+    return theListings.toArray();
 };
 
 /* Gets all listings whose status is "active". */ 
@@ -83,7 +82,7 @@ export const getAllActiveListings = async () => {
         status: "active"
     });
     if (!theListings) throw `getAllActiveListings: Listings not found from this donor Id.`;
-    return theListings;
+    return theListings.toArray();
 };
 
 /* Delete a listing. */
@@ -96,7 +95,7 @@ export const deleteListingById = async (id) => {
 };
 
 /* Claim a listing, given the listingId and the vendorId. */
-export const claimListingById = (listingId, vendorId) => {
+export const claimListingById = async (listingId, vendorId) => {
     listingId = helpers.checkAndThrowId(listingId);
     vendorId = helpers.checkAndThrowId(vendorId);
     const listingCollection = await listings();
