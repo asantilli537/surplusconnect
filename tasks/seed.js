@@ -6,6 +6,7 @@ import {
   messagesCollection,
   notificationsCollection,
   addressesCollection,
+  complaintsCollection,
 } from '../config/mongoCollections.js';
 import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
@@ -419,6 +420,42 @@ const main = async () => {
 
   await notifCol.insertMany(notifDocs);
   console.log('seeded notifications');
+
+  // ---- complaints ----
+
+  const complaintCol = await complaintsCollection();
+
+  const complaintDocs = [
+  {
+    filedById:       '222222222222222222222222',
+    transactionId:   'e5e5e5e5e5e5e5e5e5e5e5e5',
+    listingId:       'a1a1a1a1a1a1a1a1a1a1a1a1',
+    donorId:         '111111111111111111111111',
+    distributorId:   '222222222222222222222222',
+    complaint:       'The pickup location was locked when we arrived and nobody was available to let us in. We waited 45 minutes and had to leave without the food.',
+    status:          'open',
+    isResolved:      false,
+    filedAt:         '2026-04-10T18:00:00.000Z',
+    resolvedAt:      null,
+    resolvedBy:      null,
+  },
+  {
+    filedById:       '111111111111111111111111',
+    transactionId:   'f6f6f6f6f6f6f6f6f6f6f6f6',
+    listingId:       'c3c3c3c3c3c3c3c3c3c3c3c3',
+    donorId:         '111111111111111111111111',
+    distributorId:   '222222222222222222222222',
+    complaint:       'The distributor claimed the soup listing but has not responded to any messages in over 24 hours. The food is at risk of expiring before pickup.',
+    status:          'investigation',
+    isResolved:      false,
+    filedAt:         '2026-04-29T20:00:00.000Z',
+    resolvedAt:      null,
+    resolvedBy:      null,
+  },
+  ];
+
+  await complaintCol.insertMany(complaintDocs);
+  console.log('seeded complaints');
 
   console.log('');
   console.log('---- seed complete ----');
