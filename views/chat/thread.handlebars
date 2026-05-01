@@ -41,7 +41,7 @@
             >
               <span class="message-sender">{{this.senderName}}</span>
               <p class="message-text">{{this.content}}</p>
-              <span class="message-time">{{this.timestamp}}</span>
+              <span class="message-time">{{formatDate this.timestamp}}</span>
             </div>
           {{/each}}
         {{else}}
