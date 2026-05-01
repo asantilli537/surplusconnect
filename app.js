@@ -22,21 +22,67 @@ const PORT = 3000;
 app.engine(
   'handlebars',
   engine({
-    layoutsDir:  path.join(__dirname, 'views/layouts'),
+    layoutsDir:    path.join(__dirname, 'views/layouts'),
     defaultLayout: 'main',
-    partialsDir: path.join(__dirname, 'views/partials'),
+    partialsDir:   path.join(__dirname, 'views/partials'),
     helpers: {
+
       // checking equality between two values in templates
       if_eq(a, b, opts) {
         return a === b ? opts.fn(this) : opts.inverse(this);
       },
+
       // checking if a is greater than b
       if_gt(a, b, opts) {
         return a > b ? opts.fn(this) : opts.inverse(this);
       },
+
       // checking if a is less than b
       if_lt(a, b, opts) {
         return a < b ? opts.fn(this) : opts.inverse(this);
+      },
+
+      /*
+        formatting ISO date strings into something readable for display.
+        used on listing cards, history tables, and the chat thread timestamps.
+        returning n/a gracefully if the value is missing or unparseable.
+      */
+      formatDate(isoString) {
+        if (!isoString) return 'n/a';
+        try {
+          const date = new Date(isoString);
+          if (isNaN(date.getTime())) return isoString;
+          return date.toLocaleString('en-US', {
+            month:  'short',
+            day:    'numeric',
+            year:   'numeric',
+            hour:   'numeric',
+            minute: '2-digit',
+            hour12: true,
+          });
+        } catch (e) {
+          // if something weird happens just return the raw string
+          return isoString;
+        }
+      },
+
+      /*
+        formatting just the date portion without the time.
+        used on history tables where the full timestamp is too long.
+      */
+      formatDateOnly(isoString) {
+        if (!isoString) return 'n/a';
+        try {
+          const date = new Date(isoString);
+          if (isNaN(date.getTime())) return isoString;
+          return date.toLocaleString('en-US', {
+            month: 'short',
+            day:   'numeric',
+            year:  'numeric',
+          });
+        } catch (e) {
+          return isoString;
+        }
       },
     },
   })
@@ -68,17 +114,18 @@ app.use(
 // ---- global middleware ----
 
 /*
-  attaching the unread notification count to every request so
-  the navbar bell badge always shows the right number without
-  each individual route having to pass it manually.
-  wrapping in try/catch so a db blip never crashes an unrelated page.
+  attaching unread notification count to every request so the navbar
+  bell badge always shows the right number without each route having
+  to pass it manually. res.locals makes it available in every template.
+  wrapping in try/catch so a notification db hiccup never crashes an
+  unrelated page request.
 */
 app.use(async (req, res, next) => {
   if (req.session.user) {
     try {
       res.locals.unreadCount = await getUnreadCount(req.session.user._id);
     } catch (e) {
-      // not blocking the request if notification count fails
+      // not blocking the request if the notification count fails
       res.locals.unreadCount = 0;
     }
   } else {

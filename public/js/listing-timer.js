@@ -61,33 +61,33 @@ const applyTimerClass = (timerEl, ms) => {
 };
 
 const initListingTimers = () => {
-  const cards = document.querySelectorAll('.listing-card[data-expiration]');
+  const timerEls = document.querySelectorAll('.listing-timer[data-expiration]');
+  if (timerEls.length === 0) return;
 
-  if (cards.length === 0) return;
-
-  cards.forEach((card) => {
-    const expirationStr = card.dataset.expiration;
+  timerEls.forEach((timerEl) => {
+    const expirationStr = timerEl.dataset.expiration;
     if (!expirationStr) return;
 
     const expirationMs = new Date(expirationStr).getTime();
-    const timerEl = card.querySelector('.listing-timer');
-    if (!timerEl) return;
 
     const tick = () => {
       const remaining = expirationMs - Date.now();
 
       timerEl.textContent = formatTimeRemaining(remaining);
-      applyUrgencyClass(card, remaining);
       applyTimerClass(timerEl, remaining);
 
-      // stopping the interval once the listing expires
+      // applying urgency border color if this timer is inside a listing card
+      const parentCard = timerEl.closest('.listing-card');
+      if (parentCard) {
+        applyUrgencyClass(parentCard, remaining);
+      }
+
       if (remaining <= 0) {
         clearInterval(intervalId);
         timerEl.textContent = 'expired';
       }
     };
 
-    // running immediately so there's no delay on first render
     tick();
     const intervalId = setInterval(tick, 1000);
   });
