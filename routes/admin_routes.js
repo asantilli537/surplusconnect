@@ -13,6 +13,7 @@ import {
   transactionsCollection,
   complaintsCollection,
 } from '../config/mongoCollections.js';
+import { ObjectId } from 'mongodb';
 
 const router = Router();
 
@@ -170,10 +171,46 @@ router.route('/admin/complaints/:id').get(requireRole('admin'), async (req, res)
   try {
     const complaint = await getComplaintById(req.params.id);
 
+    // fetching donor and distributor names to display instead of raw IDs
+    const userCol = await usersCollection();
+
+    let donorName       = complaint.donorId;
+    let distributorName = complaint.distributorId;
+
+    try {
+      const donor = await userCol.findOne(
+        { _id: new ObjectId(complaint.donorId) },
+        { projection: { firstName: 1, lastName: 1, organizationName: 1 } }
+      );
+      if (donor) {
+        donorName = donor.organizationName
+          ? `${donor.firstName} ${donor.lastName} (${donor.organizationName})`
+          : `${donor.firstName} ${donor.lastName}`;
+      }
+    } catch (e) {
+      // keeping the raw ID if lookup fails
+    }
+
+    try {
+      const distributor = await userCol.findOne(
+        { _id: new ObjectId(complaint.distributorId) },
+        { projection: { firstName: 1, lastName: 1, organizationName: 1 } }
+      );
+      if (distributor) {
+        distributorName = distributor.organizationName
+          ? `${distributor.firstName} ${distributor.lastName} (${distributor.organizationName})`
+          : `${distributor.firstName} ${distributor.lastName}`;
+      }
+    } catch (e) {
+      // keeping the raw ID if lookup fails
+    }
+
     return res.render('admin/complaint-detail', {
-      pageTitle: 'Review Complaint',
-      user:      req.session.user,
+      pageTitle:       'Review Complaint',
+      user:            req.session.user,
       complaint,
+      donorName,
+      distributorName,
     });
   } catch (e) {
     return res.status(404).render('error', {

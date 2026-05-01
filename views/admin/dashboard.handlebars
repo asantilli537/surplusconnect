@@ -2,9 +2,7 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">admin dashboard</h1>
-      <p class="page-subtitle">
-        platform overview and moderation controls
-      </p>
+      <p class="page-subtitle">platform overview and moderation controls</p>
     </div>
   </div>
 </div>
@@ -31,33 +29,24 @@
     </div>
   </div>
 
-  <div class="admin-grid">
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-10);">
 
-    {{!-- recent complaints --}}
+    {{!-- recent complaints preview --}}
     <section class="dashboard-section" aria-labelledby="complaints-heading">
       <div class="section-header">
-        <h2 class="section-title" id="complaints-heading">
-          recent complaints
-        </h2>
-        <a href="/admin/complaints" class="btn btn-secondary btn-sm">
-          view all
-        </a>
+        <h2 class="section-title" id="complaints-heading">recent complaints</h2>
+        <a href="/admin/complaints" class="btn btn-secondary btn-sm">view all</a>
       </div>
 
       {{#if hasRecentComplaints}}
         <div class="admin-list">
           {{#each recentComplaints}}
-            
-              href="/admin/complaints/{{this._id}}"
-              class="admin-list-item"
-            >
+            <a href="/admin/complaints/{{this._id}}" class="admin-list-item">
               <div class="admin-list-item-main">
                 <span class="admin-list-title">{{this.complaint}}</span>
-                <span class="admin-list-meta">{{this.date}}</span>
+                <span class="admin-list-meta">filed {{formatDate this.filedAt}}</span>
               </div>
-              <span class="badge badge-{{this.status}}">
-                {{this.status}}
-              </span>
+              <span class="badge badge-{{this.status}}">{{this.status}}</span>
             </a>
           {{/each}}
         </div>
@@ -69,15 +58,11 @@
 
     </section>
 
-    {{!-- recent audit logs --}}
+    {{!-- recent audit log preview --}}
     <section class="dashboard-section" aria-labelledby="audit-heading">
       <div class="section-header">
-        <h2 class="section-title" id="audit-heading">
-          recent admin actions
-        </h2>
-        <a href="/admin/audit-log" class="btn btn-ghost btn-sm">
-          full log
-        </a>
+        <h2 class="section-title" id="audit-heading">recent admin actions</h2>
+        <a href="/admin/audit-log" class="btn btn-ghost btn-sm">full log</a>
       </div>
 
       {{#if hasRecentLogs}}
@@ -88,7 +73,7 @@
                 <span class="admin-list-title">{{this.action}}</span>
                 <span class="admin-list-meta">{{this.description}}</span>
               </div>
-              <span class="admin-list-timestamp">{{this.timestamp}}</span>
+              <span class="admin-list-timestamp">{{formatDate this.timestamp}}</span>
             </div>
           {{/each}}
         </div>
@@ -111,23 +96,17 @@
       <a href="/admin/users" class="admin-control-card">
         <span class="admin-control-icon" aria-hidden="true">&#128101;</span>
         <span class="admin-control-label">manage users</span>
-        <span class="admin-control-desc">
-          view, suspend, or unsuspend any account
-        </span>
+        <span class="admin-control-desc">view, suspend, or unsuspend any account</span>
       </a>
       <a href="/admin/complaints" class="admin-control-card">
         <span class="admin-control-icon" aria-hidden="true">&#128203;</span>
         <span class="admin-control-label">complaints</span>
-        <span class="admin-control-desc">
-          review and resolve reported issues
-        </span>
+        <span class="admin-control-desc">review and resolve reported issues</span>
       </a>
       <a href="/admin/audit-log" class="admin-control-card">
         <span class="admin-control-icon" aria-hidden="true">&#128196;</span>
         <span class="admin-control-label">audit log</span>
-        <span class="admin-control-desc">
-          full history of all admin actions
-        </span>
+        <span class="admin-control-desc">full history of all admin actions</span>
       </a>
     </div>
   </section>
