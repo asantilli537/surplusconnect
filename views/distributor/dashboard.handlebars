@@ -14,6 +14,7 @@
 
 <div class="container">
 
+  {{!-- stat summary row --}}
   <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
     <div class="stat-card">
       <span class="stat-value">{{totalPickups}}</span>
@@ -43,7 +44,66 @@
     {{#if hasClaimedListings}}
       <div class="listings-grid">
         {{#each claimedListings}}
-          {{> listing-card listing=this showClaimButton=false showActions=false}}
+          <div class="listing-card listing-card--claimed">
+
+            <div class="listing-card-header">
+              <div class="listing-card-meta">
+                <span class="badge badge-claimed">claimed</span>
+                <span class="listing-category">{{this.foodCategory}}</span>
+              </div>
+            </div>
+
+            <div class="listing-card-body">
+              <h3 class="listing-title">{{this.title}}</h3>
+
+              {{#if this.description}}
+                <p class="listing-description">{{this.description}}</p>
+              {{/if}}
+
+              <ul class="listing-items" aria-label="food items">
+                {{#each this.items}}
+                  <li class="listing-item">
+                    <span class="listing-item-name">{{this.name}}</span>
+                    <span class="listing-item-qty">
+                      {{this.quantity}} {{this.unit}}
+                    </span>
+                  </li>
+                {{/each}}
+              </ul>
+
+              <div class="listing-pickup-info">
+                <span class="pickup-label">pickup window</span>
+                <span class="pickup-time">
+                  {{formatDate this.pickupStartTime}}
+                  &mdash;
+                  {{formatDate this.pickupEndTime}}
+                </span>
+              </div>
+
+              {{#if this.pickupAddress}}
+                <div class="listing-location">
+                  <span class="location-text">
+                    {{this.pickupAddress.street}},
+                    {{this.pickupAddress.city}},
+                    {{this.pickupAddress.state}}
+                  </span>
+                </div>
+              {{/if}}
+            </div>
+
+            {{!-- chat link is the primary action for claimed listings --}}
+            <div class="listing-card-footer">
+              {{#if this.transactionId}}
+                <a href="/chat/{{this.transactionId}}" class="btn btn-primary btn-sm">open chat</a>
+                <form action="/transactions/{{this._id}}/complete" method="POST" class="inline-form" onsubmit="return confirm('confirm this pickup is complete?')">
+                  <button type="submit" class="btn btn-secondary btn-sm">mark delivered</button>
+                </form>
+              {{else}}
+                <span class="listing-claimed-note">claimed</span>
+              {{/if}}
+            </div>
+
+          </div>
         {{/each}}
       </div>
     {{else}}
@@ -71,26 +131,24 @@
     </div>
 
     {{#if hasRecentPickups}}
-      <div class="history-table-wrap">
+      <div class="history-table-wrap card">
         <table class="history-table" role="table">
           <thead>
             <tr>
               <th scope="col">listing</th>
               <th scope="col">donor</th>
-              <th scope="col">picked up</th>
+              <th scope="col">completed</th>
               <th scope="col">status</th>
             </tr>
           </thead>
           <tbody>
             {{#each recentPickups}}
-              <tr>
-                <td>{{this.title}}</td>
+              <tr class="history-row">
+                <td class="history-title">{{this.title}}</td>
                 <td>{{this.donorName}}</td>
-                <td>{{this.completedOn}}</td>
+                <td>{{formatDate this.completedOn}}</td>
                 <td>
-                  <span class="badge badge-{{this.status}}">
-                    {{this.status}}
-                  </span>
+                  <span class="badge badge-delivered">delivered</span>
                 </td>
               </tr>
             {{/each}}

@@ -44,7 +44,7 @@
     {{#if hasActiveListings}}
       <div class="listings-grid" id="listings-grid">
         {{#each activeListings}}
-          {{> listing-card listing=this showActions=true}}
+          {{> listing-card listing=this showActions=true showClaimButton=false}}
         {{/each}}
       </div>
     {{else}}
@@ -70,26 +70,40 @@
     </div>
 
     {{#if hasRecentDonations}}
-      <div class="history-table-wrap">
+      <div class="history-table-wrap card">
         <table class="history-table" role="table">
           <thead>
             <tr>
               <th scope="col">listing</th>
               <th scope="col">claimed by</th>
-              <th scope="col">date</th>
+              <th scope="col">posted</th>
               <th scope="col">status</th>
+              <th scope="col">chat</th>
             </tr>
           </thead>
           <tbody>
             {{#each recentDonations}}
-              <tr>
-                <td>{{this.title}}</td>
-                <td>{{this.claimedBy}}</td>
-                <td>{{this.date}}</td>
+              <tr class="history-row">
+                <td class="history-title">{{this.title}}</td>
+                <td>
+                  {{#if this.claimedById}}
+                    <span class="text-muted">claimed</span>
+                  {{else}}
+                    <span class="text-muted">unclaimed</span>
+                  {{/if}}
+                </td>
+                <td>{{formatDate this.postedAt}}</td>
                 <td>
                   <span class="badge badge-{{this.status}}">
                     {{this.status}}
                   </span>
+                </td>
+                <td>
+                  {{#if this.transactionId}}
+                    <a href="/chat/{{this.transactionId}}" class="btn btn-secondary btn-sm">open chat</a>
+                  {{else}}
+                    <span class="text-muted">n/a</span>
+                  {{/if}}
                 </td>
               </tr>
             {{/each}}

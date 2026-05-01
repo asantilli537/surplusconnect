@@ -232,6 +232,78 @@
 
       </fieldset>
 
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">pickup address</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="street">
+            street address
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="street"
+            name="street"
+            placeholder="1 River St"
+            autocomplete="street-address"
+            required
+            value="{{prevData.street}}"
+          />
+          <span class="form-error" id="street-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="city">city</label>
+            <input
+              class="form-input"
+              type="text"
+              id="city"
+              name="city"
+              placeholder="Hoboken"
+              autocomplete="address-level2"
+              required
+              value="{{prevData.city}}"
+            />
+            <span class="form-error" id="city-error" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label--required" for="state">state</label>
+            <input
+              class="form-input"
+              type="text"
+              id="state"
+              name="state"
+              placeholder="NJ"
+              maxlength="2"
+              autocomplete="address-level1"
+              required
+              value="{{prevData.state}}"
+            />
+            <span class="form-error" id="state-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="zipCode">
+            zip code
+          </label>
+          <input
+            class="form-input"
+            type="text"
+            id="zipCode"
+            name="zipCode"
+            placeholder="07030"
+            maxlength="5"
+            autocomplete="postal-code"
+            required
+            value="{{prevData.zipCode}}"
+          />
+          <span class="form-error" id="zipCode-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary btn-lg">
           post listing
