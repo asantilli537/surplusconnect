@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { requireRole } from '../middleware.js';
+import { getUserById } from '../data/users.js';
 import {
   getAllActiveListings,
   getListingById,
   claimListing,
   markListingDelivered,
 } from '../data/listings.js';
+import { transactionsCollection } from '../config/mongoCollections.js';
 
 const router = Router();
 
@@ -13,16 +15,64 @@ const router = Router();
 
 router.route('/distributor/dashboard').get(requireRole('distributor'), async (req, res) => {
   try {
+    const txCol = await transactionsCollection();
+
+    // getting all active claims for this distributor
+    const activeTxs = await txCol
+      .find({
+        distributorId: req.session.user._id,
+        status:        'claimed',
+      })
+      .toArray();
+
+    // fetching the listing document for each active transaction
+    const claimedListings = [];
+    for (const tx of activeTxs) {
+      try {
+        const listing = await getListingById(tx.listingId);
+        // attaching the transactionId so the view can link to the chat
+        claimedListings.push({ ...listing, transactionId: tx._id.toString() });
+      } catch (e) {
+        // skipping listings that can't be found
+        console.error('failed to load listing for transaction:', e.message);
+      }
+    }
+
+    // getting completed pickups for the recent section
+    const completedTxs = await txCol
+      .find({
+        distributorId: req.session.user._id,
+        status:        'delivered',
+      })
+      .sort({ completedAt: -1 })
+      .limit(5)
+      .toArray();
+
+    const recentPickups = [];
+    for (const tx of completedTxs) {
+      try {
+        const listing = await getListingById(tx.listingId);
+        recentPickups.push({
+          title:       listing.title,
+          donorName:   'donor',
+          completedOn: tx.completedAt,
+          status:      'delivered',
+        });
+      } catch (e) {
+        console.error('failed to load completed listing:', e.message);
+      }
+    }
+
     return res.render('distributor/dashboard', {
       pageTitle:          'Distributor Dashboard',
       user:               req.session.user,
-      claimedListings:    [],
-      recentPickups:      [],
-      hasClaimedListings: false,
-      hasRecentPickups:   false,
-      totalPickups:       0,
-      activeClaimsCount:  0,
-      monthPickups:       0,
+      claimedListings,
+      recentPickups,
+      hasClaimedListings: claimedListings.length > 0,
+      hasRecentPickups:   recentPickups.length > 0,
+      totalPickups:       completedTxs.length,
+      activeClaimsCount:  claimedListings.length,
+      monthPickups:       completedTxs.length,
     });
   } catch (e) {
     return res.status(500).render('error', {
@@ -70,26 +120,36 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
 
 // ---- single listing detail ----
 
-router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
-  try {
-    const listing = await getListingById(req.params.id);
+  router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
+    try {
+      const listing = await getListingById(req.params.id);
 
-    return res.render('distributor/listing-detail', {
-      pageTitle:   listing.title,
-      user:        req.session.user,
-      listing,
-      canClaim:    listing.status === 'active',
-      pageScripts: ['/public/js/listing-timer.js'],
-    });
-  } catch (e) {
-    return res.status(404).render('error', {
-      pageTitle: 'Not Found',
-      user:      req.session.user,
-      status:    404,
-      error:     e.message,
-    });
-  }
-});
+      // fetching donor info to show in the about section
+      let donor = null;
+      try {
+        donor = await getUserById(listing.donorId);
+      } catch (e) {
+        // not crashing the page if donor lookup fails
+        console.error('donor lookup failed on listing detail:', e.message);
+      }
+
+      return res.render('distributor/listing-detail', {
+        pageTitle:   listing.title,
+        user:        req.session.user,
+        listing,
+        donor,
+        canClaim:    listing.status === 'active',
+        pageScripts: ['/public/js/listing-timer.js'],
+      });
+    } catch (e) {
+      return res.status(404).render('error', {
+        pageTitle: 'Not Found',
+        user:      req.session.user,
+        status:    404,
+        error:     e.message,
+      });
+    }
+  });
 
 // ---- claim a listing ----
 

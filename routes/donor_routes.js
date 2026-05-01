@@ -7,6 +7,7 @@ import {
   updateListing,
   deleteListing,
 } from '../data/listings.js';
+import { transactionsCollection } from '../config/mongoCollections.js';
 
 const router = Router();
 
@@ -16,19 +17,33 @@ router.route('/donor/dashboard').get(requireRole('donor'), async (req, res) => {
   try {
     const allListings = await getListingsByDonor(req.session.user._id);
 
-    // splitting into active and recent for the dashboard sections
     const activeListings  = allListings.filter((l) => l.status === 'active');
-    const recentDonations = allListings
-      .filter((l) => l.status !== 'active')
-      .slice(0, 5);
+    const recentDonations = allListings.filter((l) => l.status !== 'active').slice(0, 5);
+
+    // fetching transaction IDs for claimed listings so donors can access the chat
+    const txCol = await transactionsCollection();
+    const claimedWithTx = [];
+
+    for (const listing of recentDonations) {
+      if (listing.status === 'claimed') {
+        const tx = await txCol.findOne({ listingId: listing._id.toString() });
+        claimedWithTx.push({
+          ...listing,
+          _id:           listing._id,
+          transactionId: tx ? tx._id.toString() : null,
+        });
+      } else {
+        claimedWithTx.push(listing);
+      }
+    }
 
     return res.render('donor/dashboard', {
       pageTitle:          'My Dashboard',
       user:               req.session.user,
       activeListings,
-      recentDonations,
+      recentDonations:    claimedWithTx,
       hasActiveListings:  activeListings.length > 0,
-      hasRecentDonations: recentDonations.length > 0,
+      hasRecentDonations: claimedWithTx.length > 0,
       totalDonations:     allListings.filter((l) => l.status === 'delivered').length,
       activeCount:        activeListings.length,
       claimedCount:       allListings.filter((l) => l.status === 'claimed').length,
@@ -37,8 +52,8 @@ router.route('/donor/dashboard').get(requireRole('donor'), async (req, res) => {
   } catch (e) {
     return res.status(500).render('error', {
       pageTitle: 'Error',
-      user: req.session.user,
-      error: e.message,
+      user:      req.session.user,
+      error:     e.message,
     });
   }
 });
@@ -80,16 +95,14 @@ router.route('/listings/create')
       we rebuild them into an array of objects here before passing
       to the data function.
     */
-    const items = [];
-    let idx = 0;
-    while (req.body[`items[${idx}][name]`]) {
-      items.push({
-        name:     req.body[`items[${idx}][name]`],
-        quantity: req.body[`items[${idx}][quantity]`],
-        unit:     req.body[`items[${idx}][unit]`],
-      });
-      idx++;
-    }
+    // express urlencoded with extended:true already parses bracket
+    // notation into a nested array so req.body.items is ready to use
+    const rawItems = req.body.items;
+    const items = Array.isArray(rawItems)
+      ? rawItems
+      : rawItems
+        ? [rawItems]
+        : [];
 
     if (items.length === 0) {
       return res.status(400).render('donor/listing-create', {

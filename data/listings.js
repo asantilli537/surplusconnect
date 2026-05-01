@@ -5,6 +5,7 @@ import {
 } from '../config/mongoCollections.js';
 import { createThread } from './messages.js';
 import { createNotification } from './notifications.js';
+import { getAllUsers } from './users.js';
 import * as h from '../helpers.js';
 
 /*
@@ -200,6 +201,21 @@ export const createListing = async (donorId, listingData) => {
   const result = await listings.insertOne(newListing);
   if (!result.acknowledged || !result.insertedId) {
     throw new Error('failed to create listing');
+  }
+
+  // notifying distributors that a new listing is available
+  // wrapping in try/catch so a notification failure never blocks listing creation
+  try {
+  const distributors = await getAllUsers({ role: 'distributor' });
+  for (const dist of distributors) {
+    await createNotification(
+      dist._id.toString(),
+      'new_listing_nearby',
+      `new listing available nearby: "${newListing.title}"`
+    );
+    }
+   } catch (e) {
+    console.error('distributor notifications failed after listing create:', e.message);
   }
 
   return await getListingById(result.insertedId.toString());
