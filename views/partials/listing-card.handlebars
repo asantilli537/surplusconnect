@@ -22,11 +22,11 @@
       <span class="listing-category">{{listing.foodCategory}}</span>
     </div>
     {{!-- timer element is updated every second by listing-timer.js --}}
-    <div
+      <div
       class="listing-timer"
+      data-expiration="{{listing.expirationTime}}"
       aria-live="polite"
-      aria-label="time remaining for this listing"
-    >
+      aria-label="time remaining for this listing">
       calculating...
     </div>
   </div>

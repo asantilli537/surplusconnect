@@ -2,11 +2,13 @@ import { ObjectId } from 'mongodb';
 import {
   listingsCollection,
   transactionsCollection,
+  usersCollection,
 } from '../config/mongoCollections.js';
 import { createThread } from './messages.js';
 import { createNotification } from './notifications.js';
 import { getAllUsers } from './users.js';
 import * as h from '../helpers.js';
+import { createReceipt } from './receipts.js';
 
 /*
   listings are the core of SurplusConnect. donors create them,
@@ -527,7 +529,9 @@ export const claimListing = async (listingId, distributorId) => {
 /*
   called when a distributor confirms the pickup is complete.
   only the distributor who claimed the listing can mark it delivered.
-  triggers a notification to the donor after updating.
+  after updating the listing it updates the transaction, generates a
+  receipt document for the donor, and sends a notification.
+  side effects use try/catch so a receipt failure never blocks delivery.
 */
 export const markListingDelivered = async (listingId, distributorId) => {
 
@@ -539,7 +543,6 @@ export const markListingDelivered = async (listingId, distributorId) => {
   const listing  = await listings.findOne({ _id: new ObjectId(cleanListingId) });
 
   if (!listing) throw new Error('listing not found');
-
   if (listing.status !== 'claimed') {
     throw new Error('only claimed listings can be marked as delivered');
   }
@@ -547,23 +550,71 @@ export const markListingDelivered = async (listingId, distributorId) => {
     throw new Error('you do not have permission to complete this listing');
   }
 
+  const deliveredAt = new Date().toISOString();
+
+  // updating the listing status to delivered
   const result = await listings.updateOne(
     { _id: new ObjectId(cleanListingId) },
-    { $set: { status: 'delivered', deliveredAt: new Date().toISOString() } }
+    { $set: { status: 'delivered', deliveredAt } }
   );
 
   if (result.modifiedCount === 0) throw new Error('failed to mark listing as delivered');
 
-  // notifying the donor that their food reached its destination
+  // updating the transaction record to delivered status
+  let transactionId = null;
+  try {
+    const txCol = await transactionsCollection();
+    const tx    = await txCol.findOne({
+      listingId:     cleanListingId,
+      distributorId: cleanDistributorId,
+      status:        'claimed',
+    });
+
+    if (tx) {
+      await txCol.updateOne(
+        { _id: tx._id },
+        { $set: { status: 'delivered', completedAt: deliveredAt } }
+      );
+      transactionId = tx._id.toString();
+    }
+  } catch (e) {
+    console.error('transaction update failed after delivery:', e.message);
+  }
+
+  // generating the receipt document for the donor
+  if (transactionId) {
+    try {
+      const userCol    = await usersCollection();
+      const donor      = await userCol.findOne({ _id: new ObjectId(listing.donorId) });
+      const distributor = await userCol.findOne({ _id: new ObjectId(cleanDistributorId) });
+
+      if (donor && distributor) {
+        // passing the listing with deliveredAt already set for the receipt timestamp
+        const listingWithDate = { ...listing, deliveredAt };
+        await createReceipt(
+          cleanListingId,
+          transactionId,
+          listingWithDate,
+          donor,
+          distributor
+        );
+      }
+    } catch (e) {
+      // not blocking the delivery if receipt generation fails
+      console.error('receipt generation failed after delivery:', e.message);
+    }
+  }
+
+  // notifying the donor their receipt is ready to view
   try {
     await createNotification(
       listing.donorId,
-      'pickup_confirmed',
-      `pickup for "${listing.title}" has been confirmed as complete`
+      'receipt_generated',
+      `your donation receipt for "${listing.title}" is ready to view in your donation history`
     );
   } catch (e) {
-    console.error('delivery notification failed:', e.message);
+    console.error('receipt notification failed:', e.message);
   }
 
-  return { delivered: true, listingId: cleanListingId };
+  return { delivered: true, listingId: cleanListingId, transactionId };
 };

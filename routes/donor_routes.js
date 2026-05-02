@@ -8,6 +8,7 @@ import {
   deleteListing,
 } from '../data/listings.js';
 import { transactionsCollection } from '../config/mongoCollections.js';
+import { getReceiptById, getReceiptsByDonor } from '../data/receipts.js';
 
 const router = Router();
 
@@ -208,16 +209,65 @@ router.route('/donor/history').get(requireRole('donor'), async (req, res) => {
     const allListings   = await getListingsByDonor(req.session.user._id);
     const pastDonations = allListings.filter((l) => l.status !== 'active');
 
+    // fetching receipts so the view can show view receipt links
+    const receipts    = await getReceiptsByDonor(req.session.user._id);
+    const receiptMap  = {};
+    for (const receipt of receipts) {
+      receiptMap[receipt.listingId] = receipt._id.toString();
+    }
+
+    // attaching the receipt ID to each delivered listing
+    const donationsWithReceipts = pastDonations.map((listing) => ({
+      ...listing,
+      receiptId: receiptMap[listing._id.toString()] || null,
+    }));
+
     return res.render('donor/listing-history', {
       pageTitle:        'My Donation History',
       user:             req.session.user,
-      pastDonations,
-      hasPastDonations: pastDonations.length > 0,
+      pastDonations:    donationsWithReceipts,
+      hasPastDonations: donationsWithReceipts.length > 0,
     });
   } catch (e) {
     return res.status(500).render('error', {
       pageTitle: 'Error',
       user:      req.session.user,
+      error:     e.message,
+    });
+  }
+});
+
+// ---- view receipt ----
+
+/*
+  fetching the receipt and verifying the requesting donor actually
+  owns it before rendering. an admin or another donor should never
+  be able to view someone else's receipt.
+*/
+router.route('/receipts/:id').get(requireRole('donor'), async (req, res) => {
+  try {
+    const receipt = await getReceiptById(req.params.id);
+
+    // verifying the donor owns this receipt before showing it
+    if (receipt.donorId !== req.session.user._id) {
+      return res.status(403).render('error', {
+        pageTitle: 'Forbidden',
+        user:      req.session.user,
+        status:    403,
+        error:     'you do not have permission to view this receipt',
+      });
+    }
+
+    return res.render('donor/receipt-detail', {
+      pageTitle: `Receipt ${receipt.receiptNumber}`,
+      user:      req.session.user,
+      receipt,
+    });
+  } catch (e) {
+    return res.status(404).render('error', {
+      pageTitle: 'Not Found',
+      user:      req.session.user,
+      status:    404,
       error:     e.message,
     });
   }

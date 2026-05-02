@@ -2,13 +2,9 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">edit listing</h1>
-      <p class="page-subtitle">
-        update the details for this donation listing
-      </p>
+      <p class="page-subtitle">update the details for this donation listing</p>
     </div>
-    <a href="/donor/dashboard" class="btn btn-ghost">
-      &larr; back to dashboard
-    </a>
+    <a href="/donor/dashboard" class="btn btn-ghost">&larr; back to dashboard</a>
   </div>
 </div>
 
@@ -21,53 +17,26 @@
       </div>
     {{/if}}
 
-    <form
-      class="form-stack"
-      action="/listings/{{listing._id}}/edit"
-      method="POST"
-      novalidate
-      id="listing-form"
-    >
+    <form class="form-stack" action="/listings/{{listing._id}}/edit" method="POST" novalidate id="listing-form">
 
+      {{!-- listing details fieldset --}}
       <fieldset class="form-fieldset">
         <legend class="form-legend">listing details</legend>
 
         <div class="form-group">
-          <label class="form-label form-label--required" for="title">
-            listing title
-          </label>
-          <input
-            class="form-input"
-            type="text"
-            id="title"
-            name="title"
-            required
-            maxlength="100"
-            value="{{listing.title}}"
-          />
+          <label class="form-label form-label--required" for="title">listing title</label>
+          <input class="form-input" type="text" id="title" name="title" required maxlength="100" value="{{listing.title}}" />
           <span class="form-error" id="title-error" aria-live="polite"></span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="description">description</label>
-          <textarea
-            class="form-textarea"
-            id="description"
-            name="description"
-            rows="3"
-          >{{listing.description}}</textarea>
+          <textarea class="form-textarea" id="description" name="description" rows="3">{{listing.description}}</textarea>
         </div>
 
         <div class="form-group">
-          <label class="form-label form-label--required" for="foodCategory">
-            food category
-          </label>
-          <select
-            class="form-select"
-            id="foodCategory"
-            name="foodCategory"
-            required
-          >
+          <label class="form-label form-label--required" for="foodCategory">food category</label>
+          <select class="form-select" id="foodCategory" name="foodCategory" required>
             <option value="">select a category</option>
             <option value="bakery"    {{#if_eq listing.foodCategory 'bakery'}}selected{{/if_eq}}>bakery</option>
             <option value="produce"   {{#if_eq listing.foodCategory 'produce'}}selected{{/if_eq}}>produce</option>
@@ -83,75 +52,96 @@
 
         <div class="form-group">
           <label class="form-label" for="notes">pickup notes</label>
-          <textarea
-            class="form-textarea"
-            id="notes"
-            name="notes"
-            rows="2"
-          >{{listing.notes}}</textarea>
+          <textarea class="form-textarea" id="notes" name="notes" rows="2">{{listing.notes}}</textarea>
         </div>
 
       </fieldset>
 
+      {{!-- food items fieldset --}}
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">food items</legend>
+
+        <div id="items-container">
+          {{#each listing.items}}
+            <div class="items-row" id="item-row-{{@index}}">
+              <div class="form-group">
+                <label class="form-label form-label--required">item name</label>
+                <input class="form-input" type="text" name="items[{{@index}}][name]" id="items[{{@index}}][name]" required maxlength="100" value="{{this.name}}" />
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required">quantity</label>
+                <input class="form-input" type="number" name="items[{{@index}}][quantity]" min="1" max="100000" required value="{{this.quantity}}" />
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required">unit</label>
+                <input class="form-input" type="text" name="items[{{@index}}][unit]" required maxlength="20" value="{{this.unit}}" />
+              </div>
+            </div>
+          {{/each}}
+        </div>
+
+      </fieldset>
+
+      {{!-- pickup timing fieldset --}}
       <fieldset class="form-fieldset">
         <legend class="form-legend">pickup timing</legend>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label form-label--required" for="pickupStartTime">
-              pickup window start
-            </label>
-            <input
-              class="form-input"
-              type="datetime-local"
-              id="pickupStartTime"
-              name="pickupStartTime"
-              required
-              value="{{listing.pickupStartTime}}"
-            />
+            <label class="form-label form-label--required" for="pickupStartTime">pickup window start</label>
+            <input class="form-input" type="datetime-local" id="pickupStartTime" name="pickupStartTime" required value="{{listing.pickupStartTime}}" />
             <span class="form-error" id="pickupStartTime-error" aria-live="polite"></span>
           </div>
-
           <div class="form-group">
-            <label class="form-label form-label--required" for="pickupEndTime">
-              pickup window end
-            </label>
-            <input
-              class="form-input"
-              type="datetime-local"
-              id="pickupEndTime"
-              name="pickupEndTime"
-              required
-              value="{{listing.pickupEndTime}}"
-            />
+            <label class="form-label form-label--required" for="pickupEndTime">pickup window end</label>
+            <input class="form-input" type="datetime-local" id="pickupEndTime" name="pickupEndTime" required value="{{listing.pickupEndTime}}" />
             <span class="form-error" id="pickupEndTime-error" aria-live="polite"></span>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label form-label--required" for="expirationTime">
-            food expires at
-          </label>
-          <input
-            class="form-input"
-            type="datetime-local"
-            id="expirationTime"
-            name="expirationTime"
-            required
-            value="{{listing.expirationTime}}"
-          />
+          <label class="form-label form-label--required" for="expirationTime">food expires at</label>
+          <input class="form-input" type="datetime-local" id="expirationTime" name="expirationTime" required value="{{listing.expirationTime}}" />
+          <p class="form-hint">after this time the listing will be automatically marked expired if unclaimed</p>
           <span class="form-error" id="expirationTime-error" aria-live="polite"></span>
         </div>
 
       </fieldset>
 
+      {{!-- pickup address fieldset --}}
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">pickup address</legend>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="street">street address</label>
+          <input class="form-input" type="text" id="street" name="street" placeholder="1 River St" autocomplete="street-address" required value="{{#if listing.pickupAddress}}{{listing.pickupAddress.street}}{{/if}}" />
+          <span class="form-error" id="street-error" aria-live="polite"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="city">city</label>
+            <input class="form-input" type="text" id="city" name="city" placeholder="Hoboken" autocomplete="address-level2" required value="{{#if listing.pickupAddress}}{{listing.pickupAddress.city}}{{/if}}" />
+            <span class="form-error" id="city-error" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label--required" for="state">state</label>
+            <input class="form-input" type="text" id="state" name="state" placeholder="NJ" maxlength="2" autocomplete="address-level1" required value="{{#if listing.pickupAddress}}{{listing.pickupAddress.state}}{{/if}}" />
+            <span class="form-error" id="state-error" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="zipCode">zip code</label>
+          <input class="form-input" type="text" id="zipCode" name="zipCode" placeholder="07030" maxlength="5" autocomplete="postal-code" required value="{{#if listing.pickupAddress}}{{listing.pickupAddress.zipCode}}{{/if}}" />
+          <span class="form-error" id="zipCode-error" aria-live="polite"></span>
+        </div>
+
+      </fieldset>
+
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-lg">
-          save changes
-        </button>
-        <a href="/donor/dashboard" class="btn btn-ghost btn-lg">
-          cancel
-        </a>
+        <button type="submit" class="btn btn-primary btn-lg">save changes</button>
+        <a href="/donor/dashboard" class="btn btn-ghost btn-lg">cancel</a>
       </div>
 
     </form>

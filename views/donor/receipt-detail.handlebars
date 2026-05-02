@@ -1,0 +1,122 @@
+<div class="container" style="max-width: 700px;">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-6);">
+    <a href="/donor/history" class="back-link">&larr; back to donation history</a>
+    <button onclick="window.print()" class="btn btn-secondary btn-sm">print receipt</button>
+  </div>
+
+  <div class="card" style="padding: var(--space-8);">
+
+    {{!-- receipt header --}}
+    <div style="text-align:center; border-bottom: 2px solid var(--color-primary); padding-bottom: var(--space-6); margin-bottom: var(--space-6);">
+      <h1 style="color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--space-1);">
+        SurplusConnect
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: var(--text-sm);">
+        food donation receipt
+      </p>
+      <p style="font-size: var(--text-lg); font-weight: 600; margin-top: var(--space-3);">
+        receipt no. {{receipt.receiptNumber}}
+      </p>
+      <p style="color: var(--color-text-muted); font-size: var(--text-sm);">
+        issued {{formatDate receipt.issuedAt}}
+      </p>
+    </div>
+
+    {{!-- donor and distributor info side by side --}}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6);">
+
+      <div>
+        <h2 style="font-size: var(--text-sm); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted); margin-bottom: var(--space-2);">donated by</h2>
+        {{#if receipt.donorDetails.organizationName}}
+          <p style="font-weight:600;">{{receipt.donorDetails.organizationName}}</p>
+        {{/if}}
+        <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+          {{receipt.donorDetails.firstName}} {{receipt.donorDetails.lastName}}
+        </p>
+        <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+          {{receipt.donorDetails.email}}
+        </p>
+        {{#if receipt.donorDetails.address}}
+          <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1);">
+            {{receipt.donorDetails.address.street}},
+            {{receipt.donorDetails.address.city}},
+            {{receipt.donorDetails.address.state}}
+            {{receipt.donorDetails.address.zipCode}}
+          </p>
+        {{/if}}
+      </div>
+
+      <div>
+        <h2 style="font-size: var(--text-sm); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted); margin-bottom: var(--space-2);">received by</h2>
+        {{#if receipt.distributorDetails.organizationName}}
+          <p style="font-weight:600;">{{receipt.distributorDetails.organizationName}}</p>
+        {{/if}}
+        <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+          {{receipt.distributorDetails.firstName}} {{receipt.distributorDetails.lastName}}
+        </p>
+        <p style="font-size: var(--text-sm); color: var(--color-text-muted);">
+          {{receipt.distributorDetails.email}}
+        </p>
+        {{#if receipt.distributorDetails.einNumber}}
+          <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1);">
+            EIN: {{receipt.distributorDetails.einNumber}}
+          </p>
+        {{/if}}
+      </div>
+
+    </div>
+
+    {{!-- donation details table --}}
+    <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-6); margin-bottom: var(--space-6);">
+      <h2 style="font-size: var(--text-sm); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted); margin-bottom: var(--space-4);">donation details</h2>
+
+      <p style="font-weight:600; margin-bottom: var(--space-1);">{{receipt.donationDetails.title}}</p>
+      <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-4);">
+        category: {{receipt.donationDetails.foodCategory}}
+        &mdash;
+        pickup date: {{formatDate receipt.donationDetails.pickupDate}}
+      </p>
+
+      {{#if receipt.donationDetails.items}}
+        <table style="width:100%; border-collapse:collapse; font-size: var(--text-sm);">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--color-border);">
+              <th style="text-align:left; padding: var(--space-2) 0; color: var(--color-text-muted);">item</th>
+              <th style="text-align:right; padding: var(--space-2) 0; color: var(--color-text-muted);">quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each receipt.donationDetails.items}}
+              <tr style="border-bottom: 1px solid var(--color-border-light, #f0f0f0);">
+                <td style="padding: var(--space-2) 0;">{{this.name}}</td>
+                <td style="text-align:right; padding: var(--space-2) 0;">{{this.quantity}} {{this.unit}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{/if}}
+
+    </div>
+
+    {{!-- tax deduction statement box --}}
+    <div style="background: var(--color-bg-subtle, #f8f9fa); border-radius: var(--radius); padding: var(--space-4); margin-bottom: var(--space-6);">
+      <h2 style="font-size: var(--text-sm); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted); margin-bottom: var(--space-2);">
+        tax deduction statement
+      </h2>
+      <p style="font-size: var(--text-sm); line-height: 1.6;">
+        {{receipt.taxStatement}}
+      </p>
+    </div>
+
+    {{!-- footer disclaimer --}}
+    <p style="font-size: var(--text-xs, 0.75rem); color: var(--color-text-muted); text-align:center; border-top: 1px solid var(--color-border); padding-top: var(--space-4);">
+      this receipt was automatically generated by SurplusConnect on {{formatDate receipt.issuedAt}}.
+      please retain this document for your tax records.
+      food donations to qualifying 501(c)(3) organizations may be deductible under IRS Section 170.
+      consult your tax advisor for guidance specific to your situation.
+    </p>
+
+  </div>
+
+</div>

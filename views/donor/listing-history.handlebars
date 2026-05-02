@@ -2,60 +2,61 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">donation history</h1>
-      <p class="page-subtitle">
-        a full record of every listing you have posted
-      </p>
+      <p class="page-subtitle">a full record of every listing you have posted</p>
     </div>
-    <a href="/donor/dashboard" class="btn btn-ghost">
-      &larr; back to dashboard
-    </a>
+    <a href="/donor/dashboard" class="btn btn-ghost">&larr; back to dashboard</a>
   </div>
 </div>
 
 <div class="container">
-
   {{#if hasPastDonations}}
     <div class="history-table-wrap card">
       <table class="history-table" role="table">
         <thead>
           <tr>
             <th scope="col">listing title</th>
-            <th scope="col">food category</th>
+            <th scope="col">category</th>
             <th scope="col">items</th>
-            <th scope="col">claimed by</th>
             <th scope="col">posted</th>
-            <th scope="col">completed</th>
             <th scope="col">status</th>
+            <th scope="col">receipt</th>
           </tr>
         </thead>
         <tbody>
           {{#each pastDonations}}
             <tr class="history-row">
+
               <td class="history-title">{{this.title}}</td>
+
               <td>{{this.foodCategory}}</td>
+
               <td class="history-items-count">
                 {{this.items.length}} item{{#if_gt this.items.length 1}}s{{/if_gt}}
               </td>
+
+              {{!-- using formatDate instead of raw ISO string --}}
+              <td>{{formatDate this.postedAt}}</td>
+
               <td>
-                {{#if this.claimedBy}}
-                  {{this.claimedBy}}
+                <span class="badge badge-{{this.status}}">{{this.status}}</span>
+              </td>
+
+              {{!--
+                showing a view receipt link only for delivered listings that have
+                a receipt document. other statuses show n/a since no receipt exists.
+              --}}
+              <td>
+                {{#if_eq this.status 'delivered'}}
+                  {{#if this.receiptId}}
+                    <a href="/receipts/{{this.receiptId}}" class="btn btn-secondary btn-sm">view receipt</a>
+                  {{else}}
+                    <span class="text-muted">generating...</span>
+                  {{/if}}
                 {{else}}
-                  <span class="text-muted">unclaimed</span>
-                {{/if}}
+                  <span class="text-muted">n/a</span>
+                {{/if_eq}}
               </td>
-              <td>{{this.postedAt}}</td>
-              <td>
-                {{#if this.completedOn}}
-                  {{this.completedOn}}
-                {{else}}
-                  <span class="text-muted">pending</span>
-                {{/if}}
-              </td>
-              <td>
-                <span class="badge badge-{{this.status}}">
-                  {{this.status}}
-                </span>
-              </td>
+
             </tr>
           {{/each}}
         </tbody>
@@ -63,13 +64,8 @@
     </div>
   {{else}}
     <div class="empty-state empty-state--large">
-      <p class="empty-state-text">
-        you haven't posted any listings yet
-      </p>
-      <a href="/listings/create" class="btn btn-primary">
-        post your first listing
-      </a>
+      <p class="empty-state-text">you haven't posted any listings yet</p>
+      <a href="/listings/create" class="btn btn-primary">post your first listing</a>
     </div>
   {{/if}}
-
 </div>
