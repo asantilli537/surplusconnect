@@ -2,9 +2,7 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">audit log</h1>
-      <p class="page-subtitle">
-        a full record of every admin action taken on the platform
-      </p>
+      <p class="page-subtitle">a full record of every admin action taken on the platform</p>
     </div>
   </div>
 </div>
@@ -37,7 +35,7 @@
           <tr>
             <th scope="col">action</th>
             <th scope="col">performed by</th>
-            <th scope="col">target user</th>
+            <th scope="col">target</th>
             <th scope="col">description</th>
             <th scope="col">timestamp</th>
           </tr>
@@ -48,16 +46,22 @@
               <td>
                 <span class="audit-action-tag">{{this.action}}</span>
               </td>
-              <td>{{this.adminId}}</td>
-              <td>
+              {{!-- showing truncated admin ID since full lookup requires route change --}}
+              <td style="font-family:monospace; font-size:var(--text-xs);">
+                {{this.adminId}}
+              </td>
+              <td style="font-family:monospace; font-size:var(--text-xs);">
                 {{#if this.targetUserId}}
                   {{this.targetUserId}}
+                {{else if this.targetId}}
+                  {{this.targetId}}
                 {{else}}
                   <span class="text-muted">n/a</span>
                 {{/if}}
               </td>
               <td class="audit-description">{{this.description}}</td>
-              <td class="audit-timestamp">{{this.timestamp}}</td>
+              {{!-- using formatDate instead of raw ISO string --}}
+              <td class="audit-timestamp">{{formatDate this.timestamp}}</td>
             </tr>
           {{/each}}
         </tbody>

@@ -2,19 +2,14 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">good morning, {{user.firstName}}</h1>
-      <p class="page-subtitle">
-        here's what's happening with your donations today
-      </p>
+      <p class="page-subtitle">here's what's happening with your donations today</p>
     </div>
-    <a href="/listings/create" class="btn btn-primary">
-      + post a listing
-    </a>
+    <a href="/listings/create" class="btn btn-primary">+ post a listing</a>
   </div>
 </div>
 
 <div class="container">
 
-  {{!-- stat summary row --}}
   <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
     <div class="stat-card">
       <span class="stat-value">{{totalDonations}}</span>
@@ -30,15 +25,10 @@
     </div>
   </div>
 
-  {{!-- active listings section --}}
   <section class="dashboard-section" aria-labelledby="active-listings-heading">
     <div class="section-header">
-      <h2 class="section-title" id="active-listings-heading">
-        active listings
-      </h2>
-      <a href="/listings/create" class="btn btn-secondary btn-sm">
-        post new
-      </a>
+      <h2 class="section-title" id="active-listings-heading">active listings</h2>
+      <a href="/listings/create" class="btn btn-secondary btn-sm">post new</a>
     </div>
 
     {{#if hasActiveListings}}
@@ -49,24 +39,16 @@
       </div>
     {{else}}
       <div class="empty-state">
-        <p class="empty-state-text">
-          you don't have any active listings right now
-        </p>
-        <a href="/listings/create" class="btn btn-primary btn-sm">
-          post your first listing
-        </a>
+        <p class="empty-state-text">you don't have any active listings right now</p>
+        <a href="/listings/create" class="btn btn-primary btn-sm">post a new listing</a>
       </div>
     {{/if}}
-
   </section>
 
-  {{!-- recent donations section --}}
   <section class="dashboard-section" aria-labelledby="recent-heading">
     <div class="section-header">
       <h2 class="section-title" id="recent-heading">recent donations</h2>
-      <a href="/donor/history" class="btn btn-ghost btn-sm">
-        view all
-      </a>
+      <a href="/donor/history" class="btn btn-ghost btn-sm">view all</a>
     </div>
 
     {{#if hasRecentDonations}}
@@ -78,7 +60,7 @@
               <th scope="col">claimed by</th>
               <th scope="col">posted</th>
               <th scope="col">status</th>
-              <th scope="col">chat</th>
+              <th scope="col">actions</th>
             </tr>
           </thead>
           <tbody>
@@ -94,13 +76,21 @@
                 </td>
                 <td>{{formatDate this.postedAt}}</td>
                 <td>
-                  <span class="badge badge-{{this.status}}">
-                    {{this.status}}
-                  </span>
+                  <span class="badge badge-{{this.status}}">{{this.status}}</span>
                 </td>
+                {{!--
+                  showing chat and complaint links for claimed listings.
+                  delivered listings only show chat since you cannot
+                  file a complaint after the transaction is complete.
+                --}}
                 <td>
                   {{#if this.transactionId}}
-                    <a href="/chat/{{this.transactionId}}" class="btn btn-secondary btn-sm">open chat</a>
+                    <div style="display:flex; flex-direction:column; gap: var(--space-2);">
+                      <a href="/chat/{{this.transactionId}}" class="btn btn-secondary btn-sm">open chat</a>
+                      {{#if_eq this.status 'claimed'}}
+                        <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
+                      {{/if_eq}}
+                    </div>
                   {{else}}
                     <span class="text-muted">n/a</span>
                   {{/if}}
@@ -113,12 +103,10 @@
     {{else}}
       <div class="empty-state">
         <p class="empty-state-text">
-          no completed donations yet. listings you post will show up
-          here once they have been picked up.
+          no completed donations yet. listings you post will show up here once they have been picked up.
         </p>
       </div>
     {{/if}}
-
   </section>
 
 </div>

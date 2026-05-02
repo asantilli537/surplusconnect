@@ -1,0 +1,63 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">file a complaint</h1>
+      <p class="page-subtitle">
+        describe the issue with this transaction so our team can review it
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-page-wrap" style="max-width: 600px;">
+
+    {{#if errorMessage}}
+      <div class="flash-message flash-message--error" role="alert">
+        <span class="flash-text">{{errorMessage}}</span>
+      </div>
+    {{/if}}
+
+    <div class="card" style="margin-bottom: var(--space-6); padding: var(--space-4);">
+      <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin: 0;">
+        your complaint will be reviewed by a SurplusConnect admin. please provide
+        as much detail as possible including what happened, when it happened, and
+        how it affected the pickup. both parties will be notified of the outcome.
+      </p>
+    </div>
+
+    <form class="form-stack" action="/complaints/new" method="POST" novalidate>
+
+      {{!-- hidden fields carrying transaction context --}}
+      <input type="hidden" name="transactionId" value="{{transactionId}}" />
+      <input type="hidden" name="listingId"     value="{{listingId}}" />
+      <input type="hidden" name="donorId"        value="{{donorId}}" />
+      <input type="hidden" name="distributorId"  value="{{distributorId}}" />
+
+      <div class="form-group">
+        <label class="form-label form-label--required" for="complaint">
+          describe the issue
+        </label>
+        <textarea
+          class="form-textarea"
+          id="complaint"
+          name="complaint"
+          rows="6"
+          required
+          minlength="10"
+          maxlength="2000"
+          placeholder="please describe what went wrong with this transaction in as much detail as possible..."
+        >{{prevComplaint}}</textarea>
+        <span class="form-hint">minimum 10 characters, maximum 2000</span>
+        <span class="form-error" id="complaint-error" aria-live="polite"></span>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger btn-lg">submit complaint</button>
+        <a href="javascript:history.back()" class="btn btn-ghost btn-lg">cancel</a>
+      </div>
+
+    </form>
+
+  </div>
+</div>

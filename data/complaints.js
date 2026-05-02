@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { complaintsCollection } from '../config/mongoCollections.js';
 import * as h from '../helpers.js';
+import { auditLogsCollection } from '../config/mongoCollections.js';
 
 /*
   complaints are filed against a specific transaction when something
@@ -156,5 +157,21 @@ export const resolveComplaint = async (complaintId, adminId) => {
   );
 
   if (result.modifiedCount === 0) throw new Error('failed to resolve complaint');
+
+  // writing to the audit log so admins can see who resolved what and when
+  try {
+  const logs = await auditLogsCollection();
+  await logs.insertOne({
+    action:       'resolve_complaint',
+    adminId:      cleanAdminId,
+    targetId:     cleanComplaintId,
+    description:  `resolved complaint ${cleanComplaintId}`,
+    timestamp:    new Date().toISOString(),
+  });
+  } catch (e) {
+  // not blocking the resolution if the audit log fails
+  console.error('audit log failed after complaint resolve:', e.message);
+  }
+
   return { resolved: true, complaintId: cleanComplaintId };
 };

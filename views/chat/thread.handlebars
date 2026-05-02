@@ -2,16 +2,17 @@
 
   <div class="chat-header">
     <div class="chat-header-inner">
-      <a href="/distributor/dashboard" class="back-link">
-        &larr; back to dashboard
-      </a>
+      {{!-- back link goes to the correct dashboard depending on who is viewing --}}
+      {{#if_eq user.role 'donor'}}
+        <a href="/donor/dashboard" class="back-link">&larr; back to dashboard</a>
+      {{else}}
+        <a href="/distributor/dashboard" class="back-link">&larr; back to dashboard</a>
+      {{/if_eq}}
       <h1 class="chat-title">pickup coordination</h1>
       <p class="chat-subtitle">
         transaction #{{thread.transactionId}}
         {{#if thread.isReadOnly}}
-          <span class="badge badge-cancelled" style="margin-left: var(--space-2);">
-            read only
-          </span>
+          <span class="badge badge-cancelled" style="margin-left: var(--space-2);">read only</span>
         {{/if}}
       </p>
     </div>
@@ -51,19 +52,12 @@
         {{/if}}
       </div>
 
-      {{!-- message input --}}
+      {{!-- message input area, hidden for read-only threads --}}
       {{#unless thread.isReadOnly}}
         <div class="chat-input-area">
-          <form
-            class="chat-form"
-            id="chat-form"
-            novalidate
-            aria-label="send a message"
-          >
+          <form class="chat-form" id="chat-form" novalidate aria-label="send a message">
             <div class="chat-input-row">
-              <label class="sr-only" for="message-input">
-                type your message
-              </label>
+              <label class="sr-only" for="message-input">type your message</label>
               <textarea
                 class="form-textarea chat-textarea"
                 id="message-input"
@@ -74,23 +68,26 @@
                 required
                 aria-describedby="message-hint"
               ></textarea>
-              <button
-                type="submit"
-                class="btn btn-primary chat-send-btn"
-                id="chat-send-btn"
-              >
-                send
-              </button>
+              <button type="submit" class="btn btn-primary chat-send-btn" id="chat-send-btn">send</button>
             </div>
-            <span class="form-hint" id="message-hint">
-              press enter to send, shift+enter for a new line
-            </span>
+            <span class="form-hint" id="message-hint">press enter to send, shift+enter for a new line</span>
             <span class="form-error" id="chat-error" aria-live="polite"></span>
           </form>
         </div>
       {{else}}
         <div class="chat-readonly-notice">
           this conversation is locked because the transaction has been completed
+        </div>
+      {{/unless}}
+
+      {{!--
+        complaint link shown at the bottom of active threads.
+        kept subtle so it does not distract from the main coordination flow.
+        hidden for read-only threads since the transaction is already complete.
+      --}}
+      {{#unless thread.isReadOnly}}
+        <div style="text-align:center; padding: var(--space-4); border-top: 1px solid var(--color-border);">
+          <a href="/complaints/new?transactionId={{thread.transactionId}}" style="font-size: var(--text-sm); color: var(--color-text-muted);">something went wrong? file a complaint about this transaction</a>
         </div>
       {{/unless}}
 

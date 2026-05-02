@@ -1,19 +1,34 @@
 <div class="page-header">
   <div class="page-header-inner">
     <div>
-      <h1 class="page-title">my assignments</h1>
-      <p class="page-subtitle">
-        pickups that have been assigned to you as a courier
-      </p>
+      <h1 class="page-title">volunteer dashboard</h1>
+      <p class="page-subtitle">help coordinate food pickups in your area</p>
     </div>
   </div>
 </div>
 
 <div class="container">
 
+  {{!-- how it works for volunteers --}}
+  <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+    <h2 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3);">
+      how volunteer couriers work
+    </h2>
+    <p style="color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6; margin-bottom: var(--space-3);">
+      as a volunteer courier, you help transport food donations when nonprofit
+      organizations need extra help with pickup. assignments are coordinated
+      by our admin team based on your availability and location.
+    </p>
+    <p style="color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6;">
+      in the meantime, you can browse active listings below to see what food
+      is currently available for pickup in your area.
+    </p>
+  </div>
+
+  {{!-- active assignments section --}}
   <section class="dashboard-section" aria-labelledby="assigned-heading">
     <div class="section-header">
-      <h2 class="section-title" id="assigned-heading">active assignments</h2>
+      <h2 class="section-title" id="assigned-heading">my assignments</h2>
     </div>
 
     {{#if hasAssigned}}
@@ -36,15 +51,8 @@
                 <td>{{this.pickupWindow}}</td>
                 <td>{{this.distributorName}}</td>
                 <td>
-                  <form
-                    action="/volunteer/pickups/{{this._id}}/complete"
-                    method="POST"
-                    class="inline-form"
-                    onsubmit="return confirm('mark this pickup as complete?')"
-                  >
-                    <button type="submit" class="btn btn-primary btn-sm">
-                      mark complete
-                    </button>
+                  <form action="/volunteer/pickups/{{this._id}}/complete" method="POST" class="inline-form" onsubmit="return confirm('mark this pickup as complete?')">
+                    <button type="submit" class="btn btn-primary btn-sm">mark complete</button>
                   </form>
                 </td>
               </tr>
@@ -54,13 +62,60 @@
       </div>
     {{else}}
       <div class="empty-state">
-        <p class="empty-state-text">
-          no active assignments right now. check back soon.
-        </p>
+        <p class="empty-state-text">no assignments yet. our admin team will reach out when a pickup needs a courier.</p>
       </div>
     {{/if}}
   </section>
 
+  {{!-- available listings for context --}}
+  <section class="dashboard-section" aria-labelledby="available-heading">
+    <div class="section-header">
+      <h2 class="section-title" id="available-heading">active listings nearby</h2>
+    </div>
+
+    {{#if hasActiveListings}}
+      <div class="listings-grid">
+        {{#each activeListings}}
+          <div class="listing-card">
+            <div class="listing-card-header">
+              <div class="listing-card-meta">
+                <span class="badge badge-active">active</span>
+                <span class="listing-category">{{this.foodCategory}}</span>
+              </div>
+              <div class="listing-timer" data-expiration="{{this.expirationTime}}" aria-live="polite">
+                calculating...
+              </div>
+            </div>
+            <div class="listing-card-body">
+              <h3 class="listing-title">{{this.title}}</h3>
+              {{#if this.description}}
+                <p class="listing-description">{{this.description}}</p>
+              {{/if}}
+              <ul class="listing-items">
+                {{#each this.items}}
+                  <li class="listing-item">
+                    <span class="listing-item-name">{{this.name}}</span>
+                    <span class="listing-item-qty">{{this.quantity}} {{this.unit}}</span>
+                  </li>
+                {{/each}}
+              </ul>
+              {{#if this.pickupAddress}}
+                <div class="listing-location">
+                  <span class="location-text">{{this.pickupAddress.city}}, {{this.pickupAddress.state}}</span>
+                </div>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p class="empty-state-text">no active listings right now. check back soon.</p>
+      </div>
+    {{/if}}
+  </section>
+
+  {{!-- completed pickups section --}}
   <section class="dashboard-section" aria-labelledby="completed-heading">
     <div class="section-header">
       <h2 class="section-title" id="completed-heading">completed pickups</h2>
@@ -80,10 +135,8 @@
             {{#each completedPickups}}
               <tr class="history-row">
                 <td class="history-title">{{this.listingTitle}}</td>
-                <td>{{this.completedOn}}</td>
-                <td>
-                  <span class="badge badge-delivered">delivered</span>
-                </td>
+                <td>{{formatDate this.completedOn}}</td>
+                <td><span class="badge badge-delivered">delivered</span></td>
               </tr>
             {{/each}}
           </tbody>

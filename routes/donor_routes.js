@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireRole } from '../middleware.js';
+import { requireRole, requireLogin } from '../middleware.js';
 import {
   createListing,
   getListingsByDonor,
@@ -244,12 +244,15 @@ router.route('/donor/history').get(requireRole('donor'), async (req, res) => {
   owns it before rendering. an admin or another donor should never
   be able to view someone else's receipt.
 */
-router.route('/receipts/:id').get(requireRole('donor'), async (req, res) => {
+router.route('/receipts/:id').get(requireLogin, async (req, res) => {
   try {
     const receipt = await getReceiptById(req.params.id);
 
-    // verifying the donor owns this receipt before showing it
-    if (receipt.donorId !== req.session.user._id) {
+    // both the donor and the distributor involved can view the receipt
+    const userId   = req.session.user._id;
+    const canView  = receipt.donorId === userId || receipt.distributorId === userId;
+
+    if (!canView) {
       return res.status(403).render('error', {
         pageTitle: 'Forbidden',
         user:      req.session.user,

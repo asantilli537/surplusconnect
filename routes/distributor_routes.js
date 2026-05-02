@@ -8,6 +8,7 @@ import {
   markListingDelivered,
 } from '../data/listings.js';
 import { transactionsCollection } from '../config/mongoCollections.js';
+import { getReceiptByTransaction } from '../data/receipts.js';
 
 const router = Router();
 
@@ -192,11 +193,63 @@ router.route('/transactions/:id/complete').post(requireRole('distributor'), asyn
 
 router.route('/distributor/history').get(requireRole('distributor'), async (req, res) => {
   try {
+    const txCol = await transactionsCollection();
+
+    const completedTxs = await txCol
+      .find({
+        distributorId: req.session.user._id,
+        status:        'delivered',
+      })
+      .sort({ completedAt: -1 })
+      .toArray();
+
+    const pastPickups = [];
+    for (const tx of completedTxs) {
+      try {
+        const listing = await getListingById(tx.listingId);
+
+        // fetching receipt for this transaction if one exists
+        let receiptId = null;
+        try {
+          const receipt = await getReceiptByTransaction(tx._id.toString());
+          if (receipt) receiptId = receipt._id.toString();
+        } catch (e) {
+          // no receipt yet, that is fine
+        }
+
+        // fetching donor name to display in the table
+        let donorName = 'unknown donor';
+        try {
+          const { getUserById } = await import('../data/users.js');
+          const donor = await getUserById(listing.donorId);
+          donorName = donor.organizationName
+            ? donor.organizationName
+            : `${donor.firstName} ${donor.lastName}`;
+        } catch (e) {
+          // keeping default if lookup fails
+        }
+
+        pastPickups.push({
+          _id:          tx._id.toString(),
+          title:        listing.title,
+          foodCategory: listing.foodCategory,
+          itemCount:    listing.items ? listing.items.length : 0,
+          donorName,
+          createdOn:    tx.claimedAt,
+          completedOn:  tx.completedAt,
+          status:       'delivered',
+          receiptId,
+        });
+      } catch (e) {
+        console.error('failed to load listing for pickup history:', e.message);
+      }
+    }
+
     return res.render('distributor/pickup-history', {
       pageTitle:      'Pickup History',
       user:           req.session.user,
-      pastPickups:    [],
-      hasPastPickups: false,
+      pastPickups,
+      hasPastPickups: pastPickups.length > 0,
     });
   } catch (e) {
     return res.status(500).render('error', {
