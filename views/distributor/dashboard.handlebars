@@ -2,13 +2,9 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">welcome back, {{user.firstName}}</h1>
-      <p class="page-subtitle">
-        manage your claimed pickups and find new listings nearby
-      </p>
+      <p class="page-subtitle">manage your claimed pickups and find new listings nearby</p>
     </div>
-    <a href="/listings" class="btn btn-primary">
-      browse listings
-    </a>
+    <a href="/listings" class="btn btn-primary">browse listings</a>
   </div>
 </div>
 
@@ -29,69 +25,104 @@
     </div>
   </div>
 
-  {{!-- active claimed listings --}}
   <section class="dashboard-section" aria-labelledby="claimed-heading">
     <div class="section-header">
-      <h2 class="section-title" id="claimed-heading">
-        your active claims
-      </h2>
-      <a href="/listings" class="btn btn-secondary btn-sm">
-        find more
-      </a>
+      <h2 class="section-title" id="claimed-heading">your active claims</h2>
+      <a href="/listings" class="btn btn-secondary btn-sm">find more</a>
     </div>
 
     {{#if hasClaimedListings}}
       <div class="listings-grid">
         {{#each claimedListings}}
-          {{> listing-card listing=this showClaimButton=false showActions=false}}
+          <div class="listing-card listing-card--claimed">
+
+            <div class="listing-card-header">
+              <div class="listing-card-meta">
+                <span class="badge badge-claimed">claimed</span>
+                <span class="listing-category">{{this.foodCategory}}</span>
+              </div>
+            </div>
+
+            <div class="listing-card-body">
+              <h3 class="listing-title">{{this.title}}</h3>
+
+              {{#if this.description}}
+                <p class="listing-description">{{this.description}}</p>
+              {{/if}}
+
+              <ul class="listing-items" aria-label="food items">
+                {{#each this.items}}
+                  <li class="listing-item">
+                    <span class="listing-item-name">{{this.name}}</span>
+                    <span class="listing-item-qty">{{this.quantity}} {{this.unit}}</span>
+                  </li>
+                {{/each}}
+              </ul>
+
+              <div class="listing-pickup-info">
+                <span class="pickup-label">pickup window</span>
+                <span class="pickup-time">{{formatDate this.pickupStartTime}} &mdash; {{formatDate this.pickupEndTime}}</span>
+              </div>
+
+              {{#if this.pickupAddress}}
+                <div class="listing-location">
+                  <span class="location-text">{{this.pickupAddress.street}}, {{this.pickupAddress.city}}, {{this.pickupAddress.state}}</span>
+                </div>
+              {{/if}}
+            </div>
+
+            {{!--
+              primary actions: open chat, mark delivered, and file complaint.
+              complaint link only appears when a transaction exists since
+              complaints are scoped to transactions.
+            --}}
+            <div class="listing-card-footer" style="flex-direction:column; align-items:stretch;">
+            {{#if this.transactionId}}
+              <a href="/chat/{{this.transactionId}}" class="btn btn-primary btn-sm">open chat</a>
+              <form action="/transactions/{{this._id}}/complete" method="POST" class="inline-form" onsubmit="return confirm('confirm this pickup is complete?')">
+                <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;">mark delivered</button>
+              </form>
+              <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
+              {{else}}
+                <span class="listing-claimed-note">claimed</span>
+              {{/if}}
+            </div>
+
+          </div>
         {{/each}}
       </div>
     {{else}}
       <div class="empty-state">
-        <p class="empty-state-text">
-          you have no active claims right now
-        </p>
-        <a href="/listings" class="btn btn-primary btn-sm">
-          browse available listings
-        </a>
+        <p class="empty-state-text">you have no active claims right now</p>
+        <a href="/listings" class="btn btn-primary btn-sm">browse available listings</a>
       </div>
     {{/if}}
-
   </section>
 
-  {{!-- recent pickups --}}
   <section class="dashboard-section" aria-labelledby="recent-pickups-heading">
     <div class="section-header">
-      <h2 class="section-title" id="recent-pickups-heading">
-        recent pickups
-      </h2>
-      <a href="/distributor/history" class="btn btn-ghost btn-sm">
-        view all
-      </a>
+      <h2 class="section-title" id="recent-pickups-heading">recent pickups</h2>
+      <a href="/distributor/history" class="btn btn-ghost btn-sm">view all</a>
     </div>
 
     {{#if hasRecentPickups}}
-      <div class="history-table-wrap">
+      <div class="history-table-wrap card">
         <table class="history-table" role="table">
           <thead>
             <tr>
               <th scope="col">listing</th>
               <th scope="col">donor</th>
-              <th scope="col">picked up</th>
+              <th scope="col">completed</th>
               <th scope="col">status</th>
             </tr>
           </thead>
           <tbody>
             {{#each recentPickups}}
-              <tr>
-                <td>{{this.title}}</td>
+              <tr class="history-row">
+                <td class="history-title">{{this.title}}</td>
                 <td>{{this.donorName}}</td>
-                <td>{{this.completedOn}}</td>
-                <td>
-                  <span class="badge badge-{{this.status}}">
-                    {{this.status}}
-                  </span>
-                </td>
+                <td>{{formatDate this.completedOn}}</td>
+                <td><span class="badge badge-delivered">delivered</span></td>
               </tr>
             {{/each}}
           </tbody>
@@ -99,12 +130,9 @@
       </div>
     {{else}}
       <div class="empty-state">
-        <p class="empty-state-text">
-          no completed pickups yet. claim a listing to get started.
-        </p>
+        <p class="empty-state-text">no completed pickups yet. claim a listing to get started.</p>
       </div>
     {{/if}}
-
   </section>
 
 </div>

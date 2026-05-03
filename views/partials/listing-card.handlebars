@@ -1,3 +1,14 @@
+{{!--
+  listing-card partial - reusable card component for a single listing.
+  used on the donor dashboard, distributor browse page, and anywhere
+  else listings are displayed in a grid.
+
+  expected context:
+    listing      - the listing document from the database
+    showActions  - true for donor views (shows edit/delete buttons)
+    showClaimButton - true for distributor browse view
+--}}
+
 <article
   class="listing-card listing-card--{{listing.status}}"
   data-expiration="{{listing.expirationTime}}"
@@ -10,26 +21,28 @@
       <span class="badge badge-{{listing.status}}">{{listing.status}}</span>
       <span class="listing-category">{{listing.foodCategory}}</span>
     </div>
-    <div
+    {{!-- timer element is updated every second by listing-timer.js --}}
+      <div
       class="listing-timer"
+      data-expiration="{{listing.expirationTime}}"
       aria-live="polite"
-      aria-label="time remaining for this listing"
-    >
+      aria-label="time remaining for this listing">
       calculating...
     </div>
   </div>
 
   <div class="listing-card-body">
     <h3 class="listing-title">{{listing.title}}</h3>
-    <p class="listing-description">{{listing.description}}</p>
+
+    {{#if listing.description}}
+      <p class="listing-description">{{listing.description}}</p>
+    {{/if}}
 
     <ul class="listing-items" aria-label="food items in this listing">
       {{#each listing.items}}
         <li class="listing-item">
           <span class="listing-item-name">{{this.name}}</span>
-          <span class="listing-item-qty">
-            {{this.quantity}} {{this.unit}}
-          </span>
+          <span class="listing-item-qty">{{this.quantity}} {{this.unit}}</span>
         </li>
       {{/each}}
     </ul>
@@ -37,55 +50,50 @@
     <div class="listing-pickup-info">
       <span class="pickup-label">pickup window</span>
       <span class="pickup-time">
-        {{listing.pickupStartTime}} &mdash; {{listing.pickupEndTime}}
+        {{formatDate listing.pickupStartTime}} &mdash; {{formatDate listing.pickupEndTime}}
       </span>
     </div>
 
-    <div class="listing-location">
-      <span class="location-text">
-        {{listing.pickupAddress.street}},
-        {{listing.pickupAddress.city}},
-        {{listing.pickupAddress.state}}
-      </span>
-    </div>
+    {{#if listing.pickupAddress}}
+      <div class="listing-location">
+        <span class="location-text">
+          {{listing.pickupAddress.street}},
+          {{listing.pickupAddress.city}},
+          {{listing.pickupAddress.state}}
+        </span>
+      </div>
+    {{/if}}
   </div>
 
-  {{!-- action buttons shown differently depending on who is viewing --}}
+  {{!-- donor-facing actions: edit and delete on active listings only --}}
   {{#if showActions}}
     <div class="listing-card-footer">
       {{#if_eq listing.status 'active'}}
-        
-          href="/listings/{{listing._id}}/edit"
-          class="btn btn-ghost btn-sm"
-        >
-          edit
-        </a>
+        <a href="/listings/{{listing._id}}/edit" class="btn btn-ghost btn-sm">edit</a>
         <form
           action="/listings/{{listing._id}}/delete"
           method="POST"
           class="inline-form"
           onsubmit="return confirm('are you sure you want to delete this listing?')"
         >
-          <button type="submit" class="btn btn-danger btn-sm">
-            delete
-          </button>
+          <button type="submit" class="btn btn-danger btn-sm">delete</button>
         </form>
       {{/if_eq}}
 
       {{#if_eq listing.status 'claimed'}}
-        <span class="listing-claimed-note">
-          claimed &mdash; awaiting pickup
-        </span>
+        <span class="listing-claimed-note">claimed &mdash; awaiting pickup</span>
+      {{/if_eq}}
+
+      {{#if_eq listing.status 'delivered'}}
+        <span class="listing-claimed-note">delivered</span>
       {{/if_eq}}
     </div>
   {{/if}}
 
+  {{!-- distributor-facing action: view and claim button on browse page --}}
   {{#if showClaimButton}}
     <div class="listing-card-footer">
-      
-        href="/listings/{{listing._id}}"
-        class="btn btn-primary btn-sm"
-      >
+      <a href="/listings/{{listing._id}}" class="btn btn-primary btn-sm">
         view and claim
       </a>
     </div>

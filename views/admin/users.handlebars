@@ -64,13 +64,17 @@
         <tbody>
           {{#each users}}
             <tr class="history-row">
+
               <td class="history-title">
                 {{this.firstName}} {{this.lastName}}
               </td>
+
               <td>{{this.email}}</td>
+
               <td>
                 <span class="badge badge-{{this.role}}">{{this.role}}</span>
               </td>
+
               <td>
                 {{#if this.organizationName}}
                   {{this.organizationName}}
@@ -78,6 +82,7 @@
                   <span class="text-muted">n/a</span>
                 {{/if}}
               </td>
+
               <td>
                 {{#if this.isVerified}}
                   <span class="verified-check" aria-label="verified">&#10003;</span>
@@ -85,7 +90,10 @@
                   <span class="text-muted">pending</span>
                 {{/if}}
               </td>
-              <td>{{this.createdAt}}</td>
+
+              {{!-- change 1: using formatDate helper instead of raw ISO string --}}
+              <td>{{formatDate this.createdAt}}</td>
+
               <td>
                 {{#if this.isSuspended}}
                   <span class="badge badge-cancelled">suspended</span>
@@ -93,30 +101,28 @@
                   <span class="badge badge-active">active</span>
                 {{/if}}
               </td>
+
+              {{!--
+                change 2: hiding suspend/unsuspend buttons for admin accounts entirely.
+                the data function already blocks the action server-side but showing the
+                button to an admin for another admin account is confusing and misleading.
+              --}}
               <td>
-                {{#if this.isSuspended}}
-                  <form
-                    action="/admin/users/{{this._id}}/unsuspend"
-                    method="POST"
-                    class="inline-form"
-                  >
-                    <button type="submit" class="btn btn-secondary btn-sm">
-                      unsuspend
-                    </button>
-                  </form>
+                {{#if_eq this.role 'admin'}}
+                  <span class="text-muted">admin</span>
                 {{else}}
-                  <form
-                    action="/admin/users/{{this._id}}/suspend"
-                    method="POST"
-                    class="inline-form"
-                    onsubmit="return confirm('suspend this account?')"
-                  >
-                    <button type="submit" class="btn btn-danger btn-sm">
-                      suspend
-                    </button>
-                  </form>
-                {{/if}}
+                  {{#if this.isSuspended}}
+                    <form action="/admin/users/{{this._id}}/unsuspend" method="POST" class="inline-form">
+                      <button type="submit" class="btn btn-secondary btn-sm">unsuspend</button>
+                    </form>
+                  {{else}}
+                    <form action="/admin/users/{{this._id}}/suspend" method="POST" class="inline-form" onsubmit="return confirm('suspend this account?')">
+                      <button type="submit" class="btn btn-danger btn-sm">suspend</button>
+                    </form>
+                  {{/if}}
+                {{/if_eq}}
               </td>
+
             </tr>
           {{/each}}
         </tbody>

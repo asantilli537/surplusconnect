@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireRole } from '../middleware.js';
+import { getAllActiveListings } from '../data/listings.js';
 
 const router = Router();
 
@@ -7,25 +8,30 @@ const router = Router();
 
 router.route('/volunteer/dashboard').get(requireRole('volunteer'), async (req, res) => {
   try {
-    const assignedPickups  = [];
-    const completedPickups = [];
+    // fetching active listings so the volunteer can see what food
+    // is currently available in the area even without assignments
+    const activeListings = await getAllActiveListings({});
 
     return res.render('volunteer/dashboard', {
-      pageTitle:    'My Assignments',
-      user:         req.session.user,
-      assignedPickups,
-      completedPickups,
-      hasAssigned:  assignedPickups.length > 0,
-      hasCompleted: completedPickups.length > 0,
+      pageTitle:       'Volunteer Dashboard',
+      user:            req.session.user,
+      assignedPickups: [],
+      completedPickups: [],
+      hasAssigned:     false,
+      hasCompleted:    false,
+      hasActiveListings: activeListings.length > 0,
+      activeListings,
+      pageScripts:     ['/public/js/listing-timer.js'],
     });
   } catch (e) {
     return res.status(500).render('error', {
       pageTitle: 'Error',
-      user: req.session.user,
-      error: e.message,
+      user:      req.session.user,
+      error:     e.message,
     });
   }
 });
+
 
 // ---- mark pickup complete ----
 
@@ -35,8 +41,8 @@ router.route('/volunteer/pickups/:id/complete').post(requireRole('volunteer'), a
   } catch (e) {
     return res.status(500).render('error', {
       pageTitle: 'Error',
-      user: req.session.user,
-      error: e.message,
+      user:      req.session.user,
+      error:     e.message,
     });
   }
 });

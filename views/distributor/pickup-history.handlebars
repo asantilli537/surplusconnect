@@ -2,13 +2,9 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">pickup history</h1>
-      <p class="page-subtitle">
-        every listing your organization has claimed and picked up
-      </p>
+      <p class="page-subtitle">every listing your organization has claimed and picked up</p>
     </div>
-    <a href="/distributor/dashboard" class="btn btn-ghost">
-      &larr; back to dashboard
-    </a>
+    <a href="/distributor/dashboard" class="btn btn-ghost">&larr; back to dashboard</a>
   </div>
 </div>
 
@@ -21,7 +17,7 @@
           <tr>
             <th scope="col">listing</th>
             <th scope="col">donor</th>
-            <th scope="col">food category</th>
+            <th scope="col">category</th>
             <th scope="col">items</th>
             <th scope="col">claimed on</th>
             <th scope="col">completed on</th>
@@ -36,30 +32,24 @@
               <td>{{this.donorName}}</td>
               <td>{{this.foodCategory}}</td>
               <td>{{this.itemCount}} items</td>
-              <td>{{this.createdOn}}</td>
+              <td>{{formatDate this.createdOn}}</td>
               <td>
                 {{#if this.completedOn}}
-                  {{this.completedOn}}
+                  {{formatDate this.completedOn}}
                 {{else}}
                   <span class="text-muted">pending</span>
                 {{/if}}
               </td>
               <td>
-                <span class="badge badge-{{this.status}}">
-                  {{this.status}}
-                </span>
+                <span class="badge badge-{{this.status}}">{{this.status}}</span>
               </td>
+              {{!-- keeping anchor on single line to prevent Handlebars rendering raw HTML --}}
               <td>
-                {{#if_eq this.status 'delivered'}}
-                  
-                    href="/receipts/{{this.receiptId}}"
-                    class="btn btn-ghost btn-sm"
-                  >
-                    view
-                  </a>
+                {{#if this.receiptId}}
+                  <a href="/receipts/{{this.receiptId}}" class="btn btn-ghost btn-sm">view</a>
                 {{else}}
                   <span class="text-muted">n/a</span>
-                {{/if_eq}}
+                {{/if}}
               </td>
             </tr>
           {{/each}}
@@ -68,12 +58,8 @@
     </div>
   {{else}}
     <div class="empty-state empty-state--large">
-      <p class="empty-state-text">
-        no pickups on record yet. claim a listing to get started.
-      </p>
-      <a href="/listings" class="btn btn-primary">
-        browse listings
-      </a>
+      <p class="empty-state-text">no pickups on record yet. claim a listing to get started.</p>
+      <a href="/listings" class="btn btn-primary">browse listings</a>
     </div>
   {{/if}}
 

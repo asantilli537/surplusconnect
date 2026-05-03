@@ -4,6 +4,7 @@ import distributorRoutes from './distributor_routes.js';
 import adminRoutes       from './admin_routes.js';
 import volunteerRoutes   from './volunteer_routes.js';
 import chatRoutes        from './chat_routes.js';
+import complaintRoutes from './complaint_routes.js';
 
 const constructorMethod = (app) => {
   app.use('/', authRoutes);
@@ -12,6 +13,7 @@ const constructorMethod = (app) => {
   app.use('/', adminRoutes);
   app.use('/', volunteerRoutes);
   app.use('/', chatRoutes);
+  app.use('/', complaintRoutes);
 
   app.use(/(.*)/, (req, res) => {
     return res.status(404).render('error', {

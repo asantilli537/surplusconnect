@@ -70,16 +70,19 @@
 
               <dt class="detail-term">pickup window</dt>
               <dd class="detail-value">
-                {{listing.pickupStartTime}} &mdash; {{listing.pickupEndTime}}
+                {{formatDate listing.pickupStartTime}} &mdash; {{formatDate listing.pickupEndTime}}
               </dd>
 
               <dt class="detail-term">expires at</dt>
-              <dd
-                class="detail-value listing-timer"
-                data-expiration="{{listing.expirationTime}}"
-                aria-live="polite"
-              >
-                calculating...
+              <dd class="detail-value">
+                {{formatDate listing.expirationTime}}
+                <div
+                  class="listing-timer"
+                  data-expiration="{{listing.expirationTime}}"
+                  aria-live="polite"
+                  style="margin-top: var(--space-1);">
+                  calculating...
+                </div>
               </dd>
 
               <dt class="detail-term">location</dt>
@@ -119,11 +122,17 @@
           <div class="card-body">
             <dl class="detail-list">
               <dt class="detail-term">business</dt>
-              <dd class="detail-value">{{listing.donorOrganization}}</dd>
+              <dd class="detail-value">
+                {{#if donor.organizationName}}
+                  {{donor.organizationName}}
+                {{else}}
+                  <span class="text-muted">not listed</span>
+                {{/if}}
+              </dd>
               <dt class="detail-term">food tags</dt>
               <dd class="detail-value">
-                {{#if listing.donorTags}}
-                  {{listing.donorTags}}
+                {{#if donor.tags}}
+                  {{donor.tags}}
                 {{else}}
                   <span class="text-muted">none listed</span>
                 {{/if}}

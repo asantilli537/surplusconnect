@@ -2,9 +2,7 @@
   <div class="page-header-inner">
     <div>
       <h1 class="page-title">complaints</h1>
-      <p class="page-subtitle">
-        review and resolve reported issues between platform users
-      </p>
+      <p class="page-subtitle">review and resolve reported issues between platform users</p>
     </div>
   </div>
 </div>
@@ -32,16 +30,12 @@
   {{#if hasComplaints}}
     <div class="admin-list admin-list--full">
       {{#each complaints}}
-        
-          href="/admin/complaints/{{this._id}}"
-          class="admin-list-item admin-list-item--complaint"
-        >
+        {{!-- keeping anchor on single line to prevent Handlebars from rendering raw HTML --}}
+        <a href="/admin/complaints/{{this._id}}" class="admin-list-item admin-list-item--complaint">
           <div class="admin-list-item-main">
             <span class="admin-list-title">{{this.complaint}}</span>
             <span class="admin-list-meta">
-              filed on {{this.date}} &mdash;
-              donor: {{this.donorId}} &mdash;
-              distributor: {{this.distributorId}}
+              filed {{formatDate this.filedAt}}
             </span>
           </div>
           <div class="admin-list-item-right">

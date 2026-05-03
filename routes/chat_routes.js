@@ -21,16 +21,10 @@ router.route('/chat/:transactionId').get(requireLogin, async (req, res) => {
   try {
     const { transactionId } = req.params;
 
-    /*
-      trying to load the existing thread. if it doesn't exist yet
-      (e.g. someone visits the URL before a claim is made), we show
-      an empty thread shell instead of crashing with a 500 error.
-    */
     let thread;
     try {
       thread = await getThread(transactionId);
     } catch (e) {
-      // thread doesn't exist yet, scaffolding an empty one for the view
       thread = {
         transactionId,
         isReadOnly: false,
@@ -38,10 +32,15 @@ router.route('/chat/:transactionId').get(requireLogin, async (req, res) => {
       };
     }
 
+    // admins always see threads in read-only mode
+    // since they should observe but never participate in conversations
+    const isAdmin    = req.session.user.role === 'admin';
+    const isReadOnly = thread.isReadOnly || isAdmin;
+
     return res.render('chat/thread', {
       pageTitle:   'Chat',
       user:        req.session.user,
-      thread,
+      thread:      { ...thread, isReadOnly },
       pageScripts: ['/public/js/chat.js'],
     });
   } catch (e) {

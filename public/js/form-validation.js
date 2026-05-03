@@ -353,11 +353,12 @@ if (listingForm) {
     }
 
     // checking that at least one item row has a name filled in
-    const firstItemName = document.querySelector('input[name="items[0][name]"]');
+    const firstItemName = document.getElementById('items[0][name]');
     if (!firstItemName || !firstItemName.value.trim()) {
       valid = false;
       // showing the error near the add item button
       const container = document.getElementById('items-container');
+      console.log(container);
       if (container) {
         let errSpan = container.querySelector('.items-error');
         if (!errSpan) {
