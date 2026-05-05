@@ -18,33 +18,26 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
   try {
     const txCol = await transactionsCollection();
 
-    // getting all active claims for this distributor
     const activeTxs = await txCol
-      .find({
-        distributorId: req.session.user._id,
-        status:        'claimed',
-      })
+      .find({ distributorId: req.session.user._id, status: 'claimed' })
       .toArray();
 
-    // fetching the listing document for each active transaction
     const claimedListings = [];
     for (const tx of activeTxs) {
       try {
         const listing = await getListingById(tx.listingId);
-        // attaching the transactionId so the view can link to the chat
-        claimedListings.push({ ...listing, transactionId: tx._id.toString() });
+        claimedListings.push({
+          ...listing,
+          _id:           listing._id.toString(),
+          transactionId: tx._id.toString(),
+        });
       } catch (e) {
-        // skipping listings that can't be found
         console.error('failed to load listing for transaction:', e.message);
       }
     }
 
-    // getting completed pickups for the recent section
     const completedTxs = await txCol
-      .find({
-        distributorId: req.session.user._id,
-        status:        'delivered',
-      })
+      .find({ distributorId: req.session.user._id, status: 'delivered' })
       .sort({ completedAt: -1 })
       .limit(5)
       .toArray();
@@ -64,6 +57,10 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
       }
     }
 
+    // reading PIN error state from query params set by the verify-pin redirect
+    const pinError          = req.query.pinError   || null;
+    const pinErrorListingId = req.query.listingId  || null;
+
     return res.render('distributor/dashboard', {
       pageTitle:          'Distributor Dashboard',
       user:               req.session.user,
@@ -74,6 +71,8 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
       totalPickups:       completedTxs.length,
       activeClaimsCount:  claimedListings.length,
       monthPickups:       completedTxs.length,
+      pinError,
+      pinErrorListingId,
     });
   } catch (e) {
     return res.status(500).render('error', {
@@ -90,7 +89,6 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
   try {
     const { category, sort } = req.query;
 
-    // only passing defined non-empty filter values to the data function
     const filters = {};
     if (category && typeof category === 'string' && category.trim().length > 0) {
       filters.category = category.trim();
@@ -121,44 +119,40 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
 
 // ---- single listing detail ----
 
-  router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
+router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
+  try {
+    const listing = await getListingById(req.params.id);
+
+    let donor = null;
     try {
-      const listing = await getListingById(req.params.id);
-
-      // fetching donor info to show in the about section
-      let donor = null;
-      try {
-        donor = await getUserById(listing.donorId);
-      } catch (e) {
-        // not crashing the page if donor lookup fails
-        console.error('donor lookup failed on listing detail:', e.message);
-      }
-
-      return res.render('distributor/listing-detail', {
-        pageTitle:   listing.title,
-        user:        req.session.user,
-        listing,
-        donor,
-        canClaim:    listing.status === 'active',
-        pageScripts: ['/public/js/listing-timer.js'],
-      });
+      donor = await getUserById(listing.donorId);
     } catch (e) {
-      return res.status(404).render('error', {
-        pageTitle: 'Not Found',
-        user:      req.session.user,
-        status:    404,
-        error:     e.message,
-      });
+      console.error('donor lookup failed on listing detail:', e.message);
     }
-  });
+
+    return res.render('distributor/listing-detail', {
+      pageTitle:   listing.title,
+      user:        req.session.user,
+      listing,
+      donor,
+      canClaim:    listing.status === 'active',
+      pageScripts: ['/public/js/listing-timer.js'],
+    });
+  } catch (e) {
+    return res.status(404).render('error', {
+      pageTitle: 'Not Found',
+      user:      req.session.user,
+      status:    404,
+      error:     e.message,
+    });
+  }
+});
 
 // ---- claim a listing ----
 
 router.route('/listings/:id/claim').post(requireRole('distributor'), async (req, res) => {
   try {
     const result = await claimListing(req.params.id, req.session.user._id);
-
-    // redirecting to the chat thread that was opened when claiming
     return res.redirect(`/chat/${result.transactionId}`);
   } catch (e) {
     return res.status(400).render('error', {
@@ -169,16 +163,65 @@ router.route('/listings/:id/claim').post(requireRole('distributor'), async (req,
   }
 });
 
-// ---- confirm pickup delivered ----
+// ---- verify pickup PIN and mark delivered ----
 
 /*
-  note: this route currently receives the listingId as the param.
-  when transaction data is fully wired this will use transactionId
-  and call a transaction-level function instead.
+  the old /transactions/:id/complete route has been removed.
+  all deliveries must now go through PIN verification.
+  this prevents distributors from marking delivered without
+  physically confirming the handoff with the donor.
 */
-router.route('/transactions/:id/complete').post(requireRole('distributor'), async (req, res) => {
+router.route('/transactions/:id/verify-pin').post(requireRole('distributor'), async (req, res) => {
   try {
-    await markListingDelivered(req.params.id, req.session.user._id);
+    const { listingId, enteredPin } = req.body;
+
+    // checking listingId first since it appears in all error redirects
+    if (!listingId || typeof listingId !== 'string' || listingId.trim().length === 0) {
+      return res.status(400).render('error', {
+        pageTitle: 'Bad Request',
+        user:      req.session.user,
+        error:     'listing id is required',
+      });
+    }
+
+    // validating PIN presence before hitting the database
+    if (!enteredPin || typeof enteredPin !== 'string' || enteredPin.trim().length === 0) {
+      return res.redirect(
+        `/distributor/dashboard?pinError=${encodeURIComponent('please enter the pickup PIN')}&listingId=${listingId}`
+      );
+    }
+
+    // enforcing exactly 4 numeric digits to block padding and injection attempts
+    if (!/^\d{4}$/.test(enteredPin.trim())) {
+      return res.redirect(
+        `/distributor/dashboard?pinError=${encodeURIComponent('PIN must be exactly 4 digits')}&listingId=${listingId}`
+      );
+    }
+
+    const txCol = await transactionsCollection();
+    const tx    = await txCol.findOne({
+      listingId:     listingId.trim(),
+      distributorId: req.session.user._id,
+      status:        'claimed',
+    });
+
+    if (!tx) {
+      return res.status(404).render('error', {
+        pageTitle: 'Not Found',
+        user:      req.session.user,
+        error:     'transaction not found or already completed',
+      });
+    }
+
+    // string comparison preserves leading zeros in PINs like 0847
+    if (enteredPin.trim() !== tx.pickupPin) {
+      return res.redirect(
+        `/distributor/dashboard?pinError=${encodeURIComponent('incorrect PIN. please check with the donor.')}&listingId=${listingId}`
+      );
+    }
+
+    // PIN verified, marking the listing as delivered
+    await markListingDelivered(listingId.trim(), req.session.user._id);
     return res.redirect('/distributor/dashboard');
   } catch (e) {
     return res.status(500).render('error', {
@@ -196,10 +239,7 @@ router.route('/distributor/history').get(requireRole('distributor'), async (req,
     const txCol = await transactionsCollection();
 
     const completedTxs = await txCol
-      .find({
-        distributorId: req.session.user._id,
-        status:        'delivered',
-      })
+      .find({ distributorId: req.session.user._id, status: 'delivered' })
       .sort({ completedAt: -1 })
       .toArray();
 
@@ -208,19 +248,17 @@ router.route('/distributor/history').get(requireRole('distributor'), async (req,
       try {
         const listing = await getListingById(tx.listingId);
 
-        // fetching receipt for this transaction if one exists
         let receiptId = null;
         try {
           const receipt = await getReceiptByTransaction(tx._id.toString());
           if (receipt) receiptId = receipt._id.toString();
         } catch (e) {
-          // no receipt yet, that is fine
+          // no receipt yet, fine to skip
         }
 
-        // fetching donor name to display in the table
+        // using the top-level getUserById import instead of dynamic import
         let donorName = 'unknown donor';
         try {
-          const { getUserById } = await import('../data/users.js');
           const donor = await getUserById(listing.donorId);
           donorName = donor.organizationName
             ? donor.organizationName

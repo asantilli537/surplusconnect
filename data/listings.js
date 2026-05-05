@@ -111,6 +111,18 @@ const calculatePriorityScore = (expirationTime, items) => {
   return Math.min(urgencyScore + qtyScore, 100);
 };
 
+// ---- generatePickupPin ----
+
+/*
+  generating a zero-padded 4-digit PIN for physical pickup verification.
+  stored as a string so leading zeros are preserved.
+  0847 as a number becomes 847 which would break string comparison.
+*/
+const generatePickupPin = () => {
+  const pin = Math.floor(Math.random() * 9000) + 1000;
+  return String(pin);
+};
+
 // ---- createListing ----
 
 /*
@@ -486,6 +498,9 @@ export const claimListing = async (listingId, distributorId) => {
 
   // creating the transaction record after the listing is locked
   const txCol = await transactionsCollection();
+  // generating the pickup PIN for physical verification at the handoff
+  const pickupPin = generatePickupPin();
+
   const newTx = {
     listingId:     cleanListingId,
     donorId:       listing.donorId,
@@ -494,6 +509,7 @@ export const claimListing = async (listingId, distributorId) => {
     claimedAt:     new Date().toISOString(),
     completedAt:   null,
     receiptSent:   false,
+    pickupPin,
   };
 
   const txResult = await txCol.insertOne(newTx);
@@ -510,15 +526,25 @@ export const claimListing = async (listingId, distributorId) => {
     console.error('chat thread creation failed after claim:', e.message);
   }
 
-  // notifying the donor their listing was claimed
+  // notifying the donor with the PIN so they can share it at pickup
   try {
     await createNotification(
-      listing.donorId,
-      'listing_claimed',
-      `your listing "${listing.title}" has been claimed and is being coordinated for pickup`
+        listing.donorId,
+        'listing_claimed',
+        `your listing "${listing.title}" has been claimed. your pickup PIN is ${pickupPin}. share this with the distributor when they arrive.`
     );
   } catch (e) {
-    console.error('claim notification failed:', e.message);
+    console.error('donor claim notification failed:', e.message);
+  }
+
+  // notifying the distributor with the PIN so they know to expect it
+  try {
+    await createNotification(
+        cleanDistributorId,
+        'pickup_scheduled',
+        `you claimed "${listing.title}". When you arrive at pickup, ask the donor for their 4-digit PIN to confirm the handoff. You will enter it before marking delivered.`);
+  } catch (e) {
+    console.error('distributor pickup notification failed:', e.message);
   }
 
   return { listingId: cleanListingId, transactionId, status: 'claimed' };

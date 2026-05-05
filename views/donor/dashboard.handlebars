@@ -84,17 +84,30 @@
                   file a complaint after the transaction is complete.
                 --}}
                 <td>
-                  {{#if this.transactionId}}
-                    <div style="display:flex; flex-direction:column; gap: var(--space-2);">
-                      <a href="/chat/{{this.transactionId}}" class="btn btn-secondary btn-sm">open chat</a>
-                      {{#if_eq this.status 'claimed'}}
-                        <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
-                      {{/if_eq}}
-                    </div>
-                  {{else}}
-                    <span class="text-muted">n/a</span>
-                  {{/if}}
-                </td>
+                {{#if this.transactionId}}
+                  <div style="display:flex; flex-direction:column; gap: var(--space-2);">
+
+                    {{!-- showing the PIN prominently for claimed listings so the donor
+                        can share it verbally with the distributor at pickup --}}
+                    {{#if_eq this.status 'claimed'}}
+                      {{#if this.pickupPin}}
+                        <div style="background:var(--color-bg-subtle,#f8f9fa); border:2px solid var(--color-primary); border-radius:var(--radius); padding:var(--space-2) var(--space-3); text-align:center;">
+                          <span style="font-size:var(--text-xs); color:var(--color-text-muted); display:block; margin-bottom:2px;">pickup PIN</span>
+                          <span style="font-family:monospace; font-size:var(--text-xl); font-weight:700; letter-spacing:0.2em; color:var(--color-primary);">{{this.pickupPin}}</span>
+                          <span style="font-size:var(--text-xs); color:var(--color-text-muted); display:block; margin-top:2px;">share this at pickup</span>
+                        </div>
+                      {{/if}}
+                    {{/if_eq}}
+
+                    <a href="/chat/{{this.transactionId}}" class="btn btn-secondary btn-sm">open chat</a>
+                    {{#if_eq this.status 'claimed'}}
+                      <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
+                    {{/if_eq}}
+                  </div>
+                {{else}}
+                  <span class="text-muted">n/a</span>
+                {{/if}}
+              </td>
               </tr>
             {{/each}}
           </tbody>
