@@ -46,9 +46,21 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
     for (const tx of completedTxs) {
       try {
         const listing = await getListingById(tx.listingId);
+
+        // looking up the real donor name instead of hardcoding 'donor'
+        let donorName = 'unknown donor';
+        try {
+          const donor = await getUserById(listing.donorId);
+          donorName = donor.organizationName
+            ? donor.organizationName
+            : `${donor.firstName} ${donor.lastName}`;
+        } catch (e) {
+          console.error('donor lookup failed for recent pickup:', e.message);
+        }
+
         recentPickups.push({
           title:       listing.title,
-          donorName:   'donor',
+          donorName,
           completedOn: tx.completedAt,
           status:      'delivered',
         });
@@ -73,6 +85,7 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
       monthPickups:       completedTxs.length,
       pinError,
       pinErrorListingId,
+      isVerified: req.session.user.isVerified !== false,
     });
   } catch (e) {
     return res.status(500).render('error', {

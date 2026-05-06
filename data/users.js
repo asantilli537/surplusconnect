@@ -31,6 +31,7 @@ export const createUser = async (userData) => {
     state,
     zipCode,
     tags,
+    isVerified,
   } = userData;
 
   /* Input Validation */
@@ -100,7 +101,13 @@ export const createUser = async (userData) => {
     tags:        safeTags,
     isSuspended: false,
     // distributors start unverified until EIN is confirmed against IRS list
-    isVerified:  cleanRole !== 'distributor',
+    // using the caller-provided isVerified value for distributors
+    // so the ProPublica verification result is actually stored.
+    // for all other roles isVerified defaults to true since they
+    // do not require EIN verification.
+    isVerified: cleanRole === 'distributor'
+      ? (typeof isVerifiedParam === 'boolean' ? isVerifiedParam : false)
+      : true,
     createdAt:   new Date().toISOString(),
   };
 

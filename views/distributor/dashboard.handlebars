@@ -8,6 +8,24 @@
   </div>
 </div>
 
+{{!--
+  showing a persistent but non-blocking banner for distributors
+  whose EIN could not be verified at signup. this does not prevent
+  platform use but makes the pending status visible.
+--}}
+{{#unless isVerified}}
+  <div class="container" style="padding-top: var(--space-4);">
+    <div class="flash-message flash-message--warning" role="alert">
+      <span class="flash-text">
+        your organization's EIN has not been verified against the IRS
+        501(c)(3) database. you can still browse and claim listings.
+        contact <a href="mailto:support@surplusconnect.org">support@surplusconnect.org</a>
+        to complete verification.
+      </span>
+    </div>
+  </div>
+{{/unless}}
+
 <div class="container">
 
   <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
