@@ -70,17 +70,15 @@ const initListingTimers = () => {
 
     const expirationMs = new Date(expirationStr).getTime();
 
+    let intervalId;
+
     const tick = () => {
       const remaining = expirationMs - Date.now();
-
       timerEl.textContent = formatTimeRemaining(remaining);
       applyTimerClass(timerEl, remaining);
 
-      // applying urgency border color if this timer is inside a listing card
       const parentCard = timerEl.closest('.listing-card');
-      if (parentCard) {
-        applyUrgencyClass(parentCard, remaining);
-      }
+      if (parentCard) applyUrgencyClass(parentCard, remaining);
 
       if (remaining <= 0) {
         clearInterval(intervalId);
@@ -89,7 +87,7 @@ const initListingTimers = () => {
     };
 
     tick();
-    const intervalId = setInterval(tick, 1000);
+    intervalId = setInterval(tick, 1000);
   });
 };
 

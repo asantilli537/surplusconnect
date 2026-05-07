@@ -6,6 +6,23 @@
       <p class="auth-subtitle">sign in to your SurplusConnect account</p>
     </div>
 
+    {{!--
+      showing EIN pending notice when a distributor registers with
+      an EIN that could not be verified against ProPublica at signup.
+      placed before the error block so it appears at the top of the form.
+    --}}
+    {{#if einPending}}
+      <div class="flash-message flash-message--warning" role="alert">
+        <span class="flash-text">
+          your account was created successfully. however, your EIN could not
+          be verified against the IRS 501(c)(3) database right now. you can
+          still sign in and use the platform. contact
+          <a href="mailto:support@surplusconnect.org">support@surplusconnect.org</a>
+          if your organization is a registered nonprofit and this persists.
+        </span>
+      </div>
+    {{/if}}
+
     {{#if errorMessage}}
       <div class="flash-message flash-message--error" role="alert">
         <span class="flash-text">{{errorMessage}}</span>

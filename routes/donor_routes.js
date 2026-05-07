@@ -31,7 +31,8 @@ router.route('/donor/dashboard').get(requireRole('donor'), async (req, res) => {
         claimedWithTx.push({
           ...listing,
           _id:           listing._id,
-          transactionId: tx ? tx._id.toString() : null,
+          transactionId: tx ? tx._id.toString()  : null,
+          pickupPin:     tx ? tx.pickupPin       : null,
         });
       } else {
         claimedWithTx.push(listing);

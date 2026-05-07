@@ -8,6 +8,24 @@
   </div>
 </div>
 
+{{!--
+  showing a persistent but non-blocking banner for distributors
+  whose EIN could not be verified at signup. this does not prevent
+  platform use but makes the pending status visible.
+--}}
+{{#unless isVerified}}
+  <div class="container" style="padding-top: var(--space-4);">
+    <div class="flash-message flash-message--warning" role="alert">
+      <span class="flash-text">
+        your organization's EIN has not been verified against the IRS
+        501(c)(3) database. you can still browse and claim listings.
+        contact <a href="mailto:support@surplusconnect.org">support@surplusconnect.org</a>
+        to complete verification.
+      </span>
+    </div>
+  </div>
+{{/unless}}
+
 <div class="container">
 
   <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
@@ -72,17 +90,41 @@
             </div>
 
             {{!--
-              primary actions: open chat, mark delivered, and file complaint.
-              complaint link only appears when a transaction exists since
-              complaints are scoped to transactions.
+              primary actions: open chat, PIN verification, and file complaint.
+              the mark delivered button is replaced by a PIN entry form.
+              the distributor must enter the PIN they received verbally from
+              the donor at pickup before the delivery can be confirmed.
             --}}
             <div class="listing-card-footer" style="flex-direction:column; align-items:stretch;">
-            {{#if this.transactionId}}
-              <a href="/chat/{{this.transactionId}}" class="btn btn-primary btn-sm">open chat</a>
-              <form action="/transactions/{{this._id}}/complete" method="POST" class="inline-form" onsubmit="return confirm('confirm this pickup is complete?')">
-                <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;">mark delivered</button>
-              </form>
-              <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
+              {{#if this.transactionId}}
+                <a href="/chat/{{this.transactionId}}" class="btn btn-primary btn-sm">open chat</a>
+
+                <form action="/transactions/{{this._id}}/verify-pin" method="POST" class="pin-verify-form" style="margin-top:var(--space-2);">
+                  <input type="hidden" name="listingId" value="{{this._id}}" />
+                  <div style="display:flex; gap:var(--space-2); align-items:center;">
+                    <input
+                      type="text"
+                      name="enteredPin"
+                      placeholder="PIN"
+                      maxlength="4"
+                      pattern="[0-9]{4}"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      style="width:80px; font-family:monospace; font-size:var(--text-lg); letter-spacing:0.2em; text-align:center; padding:var(--space-2); border:1px solid var(--color-border); border-radius:var(--radius);"
+                      aria-label="enter the 4-digit pickup PIN from the donor"
+                    />
+                    <button type="submit" class="btn btn-secondary btn-sm" style="flex:1;">confirm pickup</button>
+                  </div>
+
+                  {{!-- showing PIN error only for the specific card that failed --}}
+                  {{#if_eq ../pinErrorListingId this._id}}
+                    <p style="color:#dc2626; font-size:var(--text-sm); margin-top:var(--space-1);">
+                      {{../pinError}}
+                    </p>
+                  {{/if_eq}}
+                </form>
+
+                <a href="/complaints/new?transactionId={{this.transactionId}}" class="btn btn-ghost btn-sm">file complaint</a>
               {{else}}
                 <span class="listing-claimed-note">claimed</span>
               {{/if}}
