@@ -1,0 +1,125 @@
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">donation statistics</h1>
+      <p class="page-subtitle">a summary of your impact on the platform</p>
+    </div>
+    <a href="/donor/dashboard" class="btn btn-ghost">&larr; back to dashboard</a>
+  </div>
+</div>
+
+<div class="container">
+
+  {{!-- overview stat cards --}}
+  <div class="dashboard-grid" style="margin-bottom: var(--space-10);">
+    <div class="stat-card">
+      <span class="stat-value">{{totalPosted}}</span>
+      <span class="stat-label">listings posted</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{totalDelivered}}</span>
+      <span class="stat-label">successfully delivered</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{totalClaimed}}</span>
+      <span class="stat-label">currently claimed</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{completionRate}}%</span>
+      <span class="stat-label">pickup completion rate</span>
+    </div>
+  </div>
+
+  {{!-- food impact banner --}}
+  <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-8); text-align:center;">
+    <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-1);">total food donated</p>
+    <p style="font-size: var(--text-3xl, 2rem); font-weight: 700; color: var(--color-primary);">{{totalItems}} units</p>
+    <p style="font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1);">across all delivered listings</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-8);">
+
+    {{!-- breakdown by food category --}}
+    <section class="dashboard-section card" style="padding: var(--space-6);">
+      <h2 class="section-title" style="margin-bottom: var(--space-4);">donations by category</h2>
+
+      {{#if hasCategories}}
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">category</th>
+              <th scope="col">posted</th>
+              <th scope="col">delivered</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each byCategory}}
+              <tr class="history-row">
+                <td>{{this.category}}</td>
+                <td>{{this.posted}}</td>
+                <td>{{this.delivered}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <div class="empty-state">
+          <p class="empty-state-text">no listings posted yet</p>
+        </div>
+      {{/if}}
+    </section>
+
+    {{!-- top receiving organizations --}}
+    <section class="dashboard-section card" style="padding: var(--space-6);">
+      <h2 class="section-title" style="margin-bottom: var(--space-4);">top receiving organizations</h2>
+
+      {{#if hasTopOrgs}}
+        <table class="history-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">organization</th>
+              <th scope="col">pickups</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each topOrganizations}}
+              <tr class="history-row">
+                <td class="history-title">{{this.name}}</td>
+                <td>{{this.pickups}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <div class="empty-state">
+          <p class="empty-state-text">no completed pickups yet</p>
+        </div>
+      {{/if}}
+    </section>
+
+  </div>
+
+  {{!-- monthly trend table --}}
+  <section class="dashboard-section card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+    <h2 class="section-title" style="margin-bottom: var(--space-4);">monthly activity</h2>
+    <table class="history-table" role="table">
+      <thead>
+        <tr>
+          <th scope="col">month</th>
+          <th scope="col">listings posted</th>
+          <th scope="col">delivered</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each monthlyTrend}}
+          <tr class="history-row">
+            <td>{{this.label}}</td>
+            <td>{{this.posted}}</td>
+            <td>{{this.delivered}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+
+</div>
