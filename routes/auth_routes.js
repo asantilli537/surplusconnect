@@ -3,6 +3,35 @@ import { requireGuest } from '../middleware.js';
 import { createUser, loginUser } from '../data/users.js';
 import { getNotificationsForUser, markAllAsRead } from '../data/notifications.js';
 
+
+/*
+  checking if two organization names share at least one significant word.
+  ignoring common stop words so "The Food Bank" vs "Food Bank of NYC"
+  both match on "food" and "bank".
+  returns true if meaningful overlap exists, false otherwise.
+*/
+const STOP_WORDS = new Set([
+  'the', 'of', 'for', 'and', 'a', 'an', 'in', 'at', 'to', 'inc',
+  'llc', 'corp', 'corporation', 'organization', 'org', 'ngo', 'npo',
+]);
+
+const orgNamesOverlap = (nameA, nameB) => {
+  if (!nameA || !nameB) return false;
+
+  const tokenize = (name) =>
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  const wordsA = new Set(tokenize(nameA));
+  const wordsB = tokenize(nameB);
+
+  // at least one significant word must appear in both names
+  return wordsB.some((w) => wordsA.has(w));
+};
+
 /*
   verifying an EIN against the IRS 501(c)(3) database via the
   ProPublica Nonprofit Explorer API. ProPublica aggregates IRS
@@ -15,110 +44,83 @@ import { getNotificationsForUser, markAllAsRead } from '../data/notifications.js
   logged. returning false on any error means signup proceeds with
   isVerified: false rather than crashing or blocking the user.
 */
-const verifyEinWithProPublica = async (einNumber) => {
+const verifyEinWithProPublica = async (einNumber, submittedOrgName) => {
 
-  // stripping all non-digit characters to normalize formats like
-  // "13-1234567", "13 1234567", and "131234567" identically
   const cleanEin = String(einNumber).replace(/\D/g, '');
 
-  // EINs are always exactly 9 digits. anything else is malformed
   if (cleanEin.length !== 9) {
     console.warn('EIN verification skipped: malformed EIN length', cleanEin.length);
-    return false;
+    return { verified: false, reason: 'malformed EIN' };
   }
 
-  /*
-    known-valid EINs bypass the API call entirely for two reasons.
-    first: guarantees the demo works even if ProPublica is unreachable.
-    second: avoids unnecessary external calls for data we already know.
-    all three are real registered 501(c)(3) organizations.
-    131234567 = Food Bank For New York City
-    132655529 = City Harvest NYC
-    136221560 = Feeding America
-    131624100 = Community Food Bank of NYC (Maria's seed EIN)
-  */
-  const KNOWN_VALID_EINS = new Set([
-    '131234567',
-    '132655529',
-    '136221560',
-    '131624100',
+  const KNOWN_VALID_EINS = new Map([
+    ['131234567', 'Food Bank For New York City'],
+    ['132655529', 'City Harvest NYC'],
+    ['136221560', 'Feeding America'],
+    ['131624100', 'Community Food Bank of NYC'],
   ]);
+
   if (KNOWN_VALID_EINS.has(cleanEin)) {
+    const knownName = KNOWN_VALID_EINS.get(cleanEin);
+    const nameMatch = orgNamesOverlap(submittedOrgName, knownName);
+    if (!nameMatch) {
+      console.warn('known EIN org name mismatch. submitted:', submittedOrgName, 'expected:', knownName);
+      return { verified: false, reason: 'organization name does not match IRS records' };
+    }
     console.log('EIN verified via known-valid list:', cleanEin);
-    return true;
+    return { verified: true, verifiedOrgName: knownName };
   }
 
-  // calling ProPublica for all EINs not in the known-valid list
   try {
     const url = `https://projects.propublica.org/nonprofits/api/v2/organizations/${cleanEin}.json`;
-
     const response = await fetch(url, {
       method:  'GET',
-      headers: {
-        'User-Agent': 'SurplusConnect-EINVerification/1.0',
-        'Accept':     'application/json',
-      },
-      // 5-second hard timeout prevents signup hanging on slow API responses
-      signal: AbortSignal.timeout(5000),
+      headers: { 'User-Agent': 'SurplusConnect-EINVerification/1.0', 'Accept': 'application/json' },
+      signal:  AbortSignal.timeout(5000),
     });
 
-    // 404 means the EIN was not found in the IRS database
     if (response.status === 404) {
-      console.log('EIN not found in ProPublica database:', cleanEin);
-      return false;
+      return { verified: false, reason: 'EIN not found in IRS database' };
     }
-
-    // any other non-200 status is a service-side error
-    // returning false so signup still works as pending verification
     if (!response.ok) {
       console.error('ProPublica API returned unexpected status:', response.status);
-      return false;
+      return { verified: false, reason: 'verification service unavailable' };
     }
 
     const data = await response.json();
 
-    // guarding against malformed response bodies
-    if (!data || typeof data !== 'object') {
-      console.error('ProPublica API returned non-object response');
-      return false;
+    if (!data?.organization?.ein) {
+      return { verified: false, reason: 'no organization data returned' };
     }
 
-    if (!data.organization || typeof data.organization !== 'object') {
-      console.log('ProPublica returned no organization for EIN:', cleanEin);
-      return false;
-    }
-
-    /*
-      comparing returned EIN against what we sent to prevent cache
-      collision or response spoofing edge cases. normalizing both
-      sides to digits-only strings before comparing.
-    */
     const returnedEin = String(data.organization.ein).replace(/\D/g, '');
     if (returnedEin !== cleanEin) {
       console.warn('ProPublica EIN mismatch. sent:', cleanEin, 'received:', returnedEin);
-      return false;
+      return { verified: false, reason: 'EIN mismatch in response' };
     }
 
-    // rejecting organizations with no name or placeholder names
-    // since these are IRS database artifacts not real nonprofits
     const orgName = String(data.organization.name || '').trim();
     if (!orgName || orgName.toLowerCase() === 'unknown organization') {
-      console.log('ProPublica EIN rejected: missing or placeholder org name:', cleanEin);
-      return false;
+      return { verified: false, reason: 'no valid organization name in IRS records' };
+    }
+
+    // checking that submitted name overlaps meaningfully with IRS-registered name
+    const nameMatch = orgNamesOverlap(submittedOrgName, orgName);
+    if (!nameMatch) {
+      console.warn('org name mismatch. submitted:', submittedOrgName, 'IRS:', orgName);
+      return { verified: false, reason: 'organization name does not match IRS records' };
     }
 
     console.log('EIN verified via ProPublica:', cleanEin, orgName);
-    return true;
+    return { verified: true, verifiedOrgName: orgName };
 
   } catch (e) {
-    // AbortError and TimeoutError both mean the 5-second limit was hit
     if (e.name === 'AbortError' || e.name === 'TimeoutError') {
       console.error('ProPublica API timed out for EIN:', cleanEin);
     } else {
       console.error('ProPublica EIN verification error:', e.message);
     }
-    // returning false so signup still proceeds as pending verification
-    return false;
+    return { verified: false, reason: 'verification service unavailable' };
   }
 };
 
@@ -314,22 +316,23 @@ router.route('/signup/distributor')
         never throws since verifyEinWithProPublica catches all its
         own errors internally. isVerified is always a clean boolean.
       */
-      const isVerified = await verifyEinWithProPublica(req.body.einNumber);
+      const { verified, verifiedOrgName, reason } = await verifyEinWithProPublica(
+        req.body.einNumber,
+        req.body.organizationName
+      );
+
+      if (!verified) {
+        console.log('EIN verification failed during signup:', reason);
+      }
 
       await createUser({
         ...req.body,
-        role: 'distributor',
-        isVerified,
+        role:             'distributor',
+        isVerified:       verified,
+        verifiedOrgName:  verifiedOrgName || null,
       });
 
-      /*
-        sending verified distributors straight to login.
-        unverified ones get a notice query param so the login page
-        can explain what happened clearly without alarming them.
-        using a fixed string value not user input to prevent
-        open redirect and query param injection attacks.
-      */
-      return isVerified
+      return verified
         ? res.redirect('/login')
         : res.redirect('/login?notice=ein-pending');
 
