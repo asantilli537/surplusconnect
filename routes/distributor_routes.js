@@ -112,6 +112,14 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
 
     const activeListings = await getAllActiveListings(filters);
 
+    const mapData = activeListings.map(listing => ({
+      _id:       listing._id,
+      title:     listing.title,
+      donorName: listing.donorName,
+      latitude:  listing.latitude,
+      longitude: listing.longitude
+    }));
+
     return res.render('distributor/listings-browse', {
       pageTitle:      'Browse Listings',
       user:           req.session.user,
@@ -119,7 +127,9 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
       hasListings:    activeListings.length > 0,
       filterCategory: category || '',
       filterSort:     sort     || 'priority',
-      pageScripts:    ['/public/js/listings-filter.js', '/public/js/listing-timer.js'],
+      requiresMap:    true,
+      listingsJson:   JSON.stringify(mapData),
+      pageScripts:    ['/public/js/listings-filter.js', '/public/js/listing-timer.js', '/public/js/map.js'],
     });
   } catch (e) {
     return res.status(500).render('error', {

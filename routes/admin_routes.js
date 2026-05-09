@@ -5,6 +5,7 @@ import {
   getAllComplaints,
   getComplaintById,
   resolveComplaint,
+  getRecentComplaints,
 } from '../data/complaints.js';
 import { getAllAuditLogs, getRecentAuditLogs } from '../data/auditLogs.js';
 import {
@@ -33,17 +34,24 @@ router.route('/admin/dashboard').get(requireRole('admin'), async (req, res) => {
     const txCol        = await transactionsCollection();
     const complaintCol = await complaintsCollection();
 
-    // running each count with the async/await pattern taught in class
+    /*// running each count with the async/await pattern taught in class
     const totalUsers        = await userCol.countDocuments({});
     const totalListings     = await listingCol.countDocuments({});
     const totalTransactions = await txCol.countDocuments({});
 
     // only counting unresolved complaints for the alert stat card
-    const openComplaints = await complaintCol.countDocuments({ isResolved: false });
+    const openComplaints = await complaintCol.countDocuments({ isResolved: false });*/
+
+    const [totalUsers, totalListings, totalTransactions, openComplaints] = await Promise.all([
+    userCol.countDocuments({}),
+    listingCol.countDocuments({}),
+    txCol.countDocuments({}),
+    complaintCol.countDocuments({ isResolved: false })
+    ]);
 
     // pulling recent items for the preview sections on the dashboard
     const allOpenComplaints = await getAllComplaints({});
-    const recentComplaints  = allOpenComplaints.slice(0, 5);
+    const recentComplaints  = await getRecentComplaints(5);
     const recentAuditLogs   = await getRecentAuditLogs(5);
 
     const stats = {

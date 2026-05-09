@@ -2049,3 +2049,8 @@ select {
   line-height: 1.7;
   flex: 1;
 }
+
+#map {
+  height: 300px;
+  width: 100%;
+}

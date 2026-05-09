@@ -53,6 +53,12 @@
     </form>
   </div>
 
+  {{!-- map container --}}
+    <div id="map"></div>
+    <script id="map-data" type="application/json">
+      {{{listingsJson}}}
+    </script>
+
   {{!-- listings grid --}}
   {{#if hasListings}}
     <div class="listings-grid" id="listings-grid">

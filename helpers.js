@@ -4,14 +4,14 @@
   means we fix it once and it works everywhere.
 */
 
-import { ObjectId } from 'mongodb';
-import xss from 'xss';
+import { ObjectId } from "mongodb";
+import xss from "xss";
 
 // ---- string validation ----
 
 export const checkStringValidity = (str, minLength = 1, maxLength = 100) => {
   if (str === undefined || str === null) return false;
-  if (typeof str !== 'string') return false;
+  if (typeof str !== "string") return false;
   str = str.trim();
   if (str.length === 0) return false;
   if (str.length < minLength || str.length > maxLength) return false;
@@ -22,9 +22,16 @@ export const checkStringValidity = (str, minLength = 1, maxLength = 100) => {
   throws if the string is invalid, returns the trimmed version if valid.
   used throughout data functions to clean and validate in one call.
 */
-export const checkAndThrowString = (str, fieldName, minLength = 1, maxLength = 100) => {
+export const checkAndThrowString = (
+  str,
+  fieldName,
+  minLength = 1,
+  maxLength = 100,
+) => {
   if (!checkStringValidity(str, minLength, maxLength)) {
-    throw new Error(`${fieldName} must be a non-empty string between ${minLength} and ${maxLength} characters`);
+    throw new Error(
+      `${fieldName} must be a non-empty string between ${minLength} and ${maxLength} characters`,
+    );
   }
   return str.trim();
 };
@@ -32,13 +39,13 @@ export const checkAndThrowString = (str, fieldName, minLength = 1, maxLength = 1
 // ---- id validation ----
 
 export const checkIdValidity = (id) => {
-  if (!id || typeof id !== 'string') return false;
+  if (!id || typeof id !== "string") return false;
   id = id.trim();
   if (id.length === 0) return false;
   return ObjectId.isValid(id);
 };
 
-export const checkAndThrowId = (id, fieldName = 'id') => {
+export const checkAndThrowId = (id, fieldName = "id") => {
   if (!checkIdValidity(id)) {
     throw new Error(`${fieldName} must be a valid ObjectId string`);
   }
@@ -55,7 +62,7 @@ export const checkEmailValidity = (email) => {
 
 export const checkAndThrowEmail = (email) => {
   if (!checkEmailValidity(email)) {
-    throw new Error('a valid email address is required');
+    throw new Error("a valid email address is required");
   }
   return email.trim().toLowerCase();
 };
@@ -68,7 +75,7 @@ export const checkAndThrowEmail = (email) => {
   one number, and one special character.
 */
 export const checkPasswordValidity = (password) => {
-  if (!password || typeof password !== 'string') return false;
+  if (!password || typeof password !== "string") return false;
   if (password.trim().length < 12) return false;
   if (!/[A-Z]/.test(password)) return false;
   if (!/[a-z]/.test(password)) return false;
@@ -80,7 +87,7 @@ export const checkPasswordValidity = (password) => {
 export const checkAndThrowPassword = (password) => {
   if (!checkPasswordValidity(password)) {
     throw new Error(
-      'password must be at least 12 characters and include uppercase, lowercase, a number, and a special character'
+      "password must be at least 12 characters and include uppercase, lowercase, a number, and a special character",
     );
   }
   return password;
@@ -96,7 +103,7 @@ export const checkPhoneValidity = (phone) => {
 
 export const checkAndThrowPhone = (phone) => {
   if (!checkPhoneValidity(phone)) {
-    throw new Error('a valid 10 digit phone number is required');
+    throw new Error("a valid 10 digit phone number is required");
   }
   return phone.trim();
 };
@@ -110,7 +117,7 @@ export const checkZipValidity = (zip) => {
 
 export const checkAndThrowZip = (zip) => {
   if (!checkZipValidity(zip)) {
-    throw new Error('zip code must be exactly 5 digits');
+    throw new Error("zip code must be exactly 5 digits");
   }
   return zip.trim();
 };
@@ -124,14 +131,14 @@ export const checkStateValidity = (state) => {
 
 export const checkAndThrowState = (state) => {
   if (!checkStateValidity(state)) {
-    throw new Error('state must be a valid 2 letter code');
+    throw new Error("state must be a valid 2 letter code");
   }
   return state.trim().toUpperCase();
 };
 
 // ---- role validation ----
 
-const validRoles = ['donor', 'distributor', 'volunteer', 'admin'];
+const validRoles = ["donor", "distributor", "volunteer", "admin"];
 
 export const checkRoleValidity = (role) => {
   if (!checkStringValidity(role)) return false;
@@ -140,7 +147,7 @@ export const checkRoleValidity = (role) => {
 
 export const checkAndThrowRole = (role) => {
   if (!checkRoleValidity(role)) {
-    throw new Error(`role must be one of: ${validRoles.join(', ')}`);
+    throw new Error(`role must be one of: ${validRoles.join(", ")}`);
   }
   return role.trim().toLowerCase();
 };
@@ -155,7 +162,7 @@ export const checkEinValidity = (ein) => {
 
 export const checkAndThrowEin = (ein) => {
   if (!checkEinValidity(ein)) {
-    throw new Error('EIN must be in the format 12-3456789');
+    throw new Error("EIN must be in the format 12-3456789");
   }
   return ein.trim();
 };
@@ -168,7 +175,7 @@ export const checkAndThrowEin = (ein) => {
   before it goes into the database.
 */
 export const sanitize = (str) => {
-  if (typeof str !== 'string') return str;
+  if (typeof str !== "string") return str;
   return xss(str.trim());
 };
 
@@ -176,32 +183,78 @@ export const sanitize = (str) => {
 
 export const getCurrentDate = () => {
   const today = new Date();
-  let month   = today.getMonth() + 1;
-  let day     = today.getDate();
-  const year  = today.getFullYear();
+  let month = today.getMonth() + 1;
+  let day = today.getDate();
+  const year = today.getFullYear();
 
-  if (day < 10)   day   = '0' + day;
-  if (month < 10) month = '0' + month;
+  if (day < 10) day = "0" + day;
+  if (month < 10) month = "0" + month;
 
   return `${month}/${day}/${year}`;
 };
 
 export const getCurrentDateTime = () => {
-  const today   = new Date();
-  let month     = today.getMonth() + 1;
-  let day       = today.getDate();
-  const year    = today.getFullYear();
-  let hours     = today.getHours();
-  let minutes   = today.getMinutes();
-  const meridiem = hours >= 12 ? 'PM' : 'AM';
+  const today = new Date();
+  let month = today.getMonth() + 1;
+  let day = today.getDate();
+  const year = today.getFullYear();
+  let hours = today.getHours();
+  let minutes = today.getMinutes();
+  const meridiem = hours >= 12 ? "PM" : "AM";
 
-  if (day < 10)     day     = '0' + day;
-  if (month < 10)   month   = '0' + month;
+  if (day < 10) day = "0" + day;
+  if (month < 10) month = "0" + month;
 
   hours = hours % 12;
-  if (hours === 0)  hours   = 12;
-  if (hours < 10)   hours   = '0' + hours;
-  if (minutes < 10) minutes = '0' + minutes;
+  if (hours === 0) hours = 12;
+  if (hours < 10) hours = "0" + hours;
+  if (minutes < 10) minutes = "0" + minutes;
 
   return `${month}/${day}/${year} ${hours}:${minutes}${meridiem}`;
+};
+
+export const geocodeAddress = async (street, city, state, zipCode) => {
+  if (!street || !city || !state || !zipCode) {
+    throw new Error("all address fields are required for geocoding");
+  }
+
+  const baseUrl = "https://nominatim.openstreetmap.org/search";
+  const query = new URLSearchParams({
+    street: street.trim(),
+    city: city.trim(),
+    state: state.trim(),
+    postalcode: zipCode.trim(),
+    country: "USA",
+    format: "json",
+    limit: 1,
+  });
+  const fetchUrl = `${baseUrl}?${query.toString()}`;
+  try {
+    const response = await fetch(fetchUrl, {
+      method: "GET",
+      headers: {
+        // NOMINATIM REQUIREMENT: Must identify your app to avoid being blocked
+        "User-Agent":
+          "SurplusConnect_CS546_Group_Project (pkulkarn1@stevens.edu)",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Geocoding API failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+      throw new Error(
+        "Invalid address: Could not locate coordinates for the provided address.",
+      );
+    }
+    return {
+      latitude: parseFloat(data[0].lat),
+      longitude: parseFloat(data[0].lon),
+    };
+  } catch (e) {
+    throw new Error(`Geocoding failed: ${e.message}`);
+  }
 };
