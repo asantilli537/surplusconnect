@@ -245,7 +245,7 @@ export const createListing = async (donorId, listingData) => {
 
   const listings = await listingsCollection();
 
-  const newAddressId = await getAddressByCooridinates(
+  const newAddressId = await getAddressByCoordinates(
     cleanStreet,
     cleanCity,
     cleanState,
@@ -431,7 +431,7 @@ export const getListingsByDonor = async (donorId) => {
 
   const listings = await listingsCollection();
   const donorListings = await listings
-    .find({ donorId: cleanId })
+    .find({ donorId: new ObjectId(cleanId)})
     .sort({ postedAt: -1 })
     .toArray();
 
