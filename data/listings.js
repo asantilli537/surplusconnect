@@ -460,7 +460,7 @@ export const updateListing = async (listingId, donorId, updateData) => {
   if (!listing) throw new Error("listing not found");
 
   // verifying ownership before allowing any modifications
-  if (listing.donorId !== cleanDonorId) {
+  if (listing.donorId.toString() !== cleanDonorId) {
     throw new Error("you do not have permission to edit this listing");
   }
   if (listing.status !== "active") {
