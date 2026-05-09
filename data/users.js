@@ -106,7 +106,7 @@ export const createUser = async (userData) => {
     // for all other roles isVerified defaults to true since they
     // do not require EIN verification.
     isVerified: cleanRole === 'distributor'
-      ? (typeof isVerifiedParam === 'boolean' ? isVerifiedParam : false)
+      ? (typeof isVerified === 'boolean' ? isVerified : false)
       : true,
     createdAt:   new Date().toISOString(),
   };

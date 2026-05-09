@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
 import { requireRole, requireLogin } from '../middleware.js';
 import {
   createListing,
@@ -7,8 +8,8 @@ import {
   updateListing,
   deleteListing,
 } from '../data/listings.js';
-import { transactionsCollection } from '../config/mongoCollections.js';
 import { getReceiptById, getReceiptsByDonor } from '../data/receipts.js';
+import { listingsCollection, transactionsCollection, usersCollection } from '../config/mongoCollections.js';
 
 const router = Router();
 
@@ -272,6 +273,151 @@ router.route('/receipts/:id').get(requireLogin, async (req, res) => {
       pageTitle: 'Not Found',
       user:      req.session.user,
       status:    404,
+      error:     e.message,
+    });
+  }
+});
+
+// ---- donation statistics ----
+
+/*
+  aggregating all listing and transaction data for this donor
+  to show meaningful impact metrics on the stats dashboard.
+  using javascript array methods instead of mongodb aggregation
+  pipelines to keep the code readable and consistent with the
+  rest of the data layer patterns in this project.
+*/
+router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
+  try {
+    const donorId  = req.session.user._id;
+    const listCol  = await listingsCollection();
+    const txCol    = await transactionsCollection();
+    const userCol  = await usersCollection();
+
+    // fetching all listings for this donor as the base dataset
+    const allListings = await listCol
+      .find({ donorId })
+      .sort({ postedAt: -1 })
+      .toArray();
+
+    // ---- overview stats ----
+
+    const totalPosted    = allListings.length;
+    const totalDelivered = allListings.filter((l) => l.status === 'delivered').length;
+    const totalClaimed   = allListings.filter((l) => l.status === 'claimed').length;
+    const totalActive    = allListings.filter((l) => l.status === 'active').length;
+    const completionRate = totalPosted > 0
+      ? Math.round((totalDelivered / totalPosted) * 100)
+      : 0;
+
+    // ---- total food impact ----
+
+    // summing quantities across all items in all delivered listings
+    const deliveredListings = allListings.filter((l) => l.status === 'delivered');
+    let totalItems = 0;
+    for (const listing of deliveredListings) {
+      if (Array.isArray(listing.items)) {
+        totalItems += listing.items.reduce(
+          (sum, item) => sum + (Number(item.quantity) || 0),
+          0
+        );
+      }
+    }
+
+    // ---- breakdown by food category ----
+
+    const categoryMap = {};
+    for (const listing of allListings) {
+      const cat = listing.foodCategory || 'other';
+      if (!categoryMap[cat]) {
+        categoryMap[cat] = { category: cat, posted: 0, delivered: 0 };
+      }
+      categoryMap[cat].posted++;
+      if (listing.status === 'delivered') categoryMap[cat].delivered++;
+    }
+    const byCategory = Object.values(categoryMap).sort(
+      (a, b) => b.delivered - a.delivered
+    );
+
+    // ---- monthly trend for the last 6 months ----
+
+    const monthlyMap = {};
+    const now = new Date();
+
+    // initializing the last 6 months so months with zero listings still show
+    for (let i = 5; i >= 0; i--) {
+      const d      = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key    = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label  = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      monthlyMap[key] = { label, posted: 0, delivered: 0 };
+    }
+
+    for (const listing of allListings) {
+      if (!listing.postedAt) continue;
+      const d   = new Date(listing.postedAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (monthlyMap[key]) {
+        monthlyMap[key].posted++;
+        if (listing.status === 'delivered') monthlyMap[key].delivered++;
+      }
+    }
+    const monthlyTrend = Object.values(monthlyMap);
+
+    // ---- top receiving organizations ----
+
+    // fetching transactions for this donor to find which distributors
+    // claimed the most listings. limiting to 5 for the leaderboard.
+    const donorTxs = await txCol
+      .find({ donorId, status: 'delivered' })
+      .toArray();
+
+    const orgMap = {};
+    for (const tx of donorTxs) {
+      const id = tx.distributorId;
+      if (!orgMap[id]) orgMap[id] = { distributorId: id, name: 'unknown', pickups: 0 };
+      orgMap[id].pickups++;
+    }
+
+    // looking up organization names for each distributor
+    for (const entry of Object.values(orgMap)) {
+      try {
+        const user = await userCol.findOne(
+          { _id: new ObjectId(entry.distributorId) },
+          { projection: { firstName: 1, lastName: 1, organizationName: 1 } }
+        );
+        if (user) {
+          entry.name = user.organizationName
+            ? user.organizationName
+            : `${user.firstName} ${user.lastName}`;
+        }
+      } catch (e) {
+        // keeping default name if lookup fails
+      }
+    }
+
+    const topOrganizations = Object.values(orgMap)
+      .sort((a, b) => b.pickups - a.pickups)
+      .slice(0, 5);
+
+    return res.render('donor/stats', {
+      pageTitle:        'My Donation Statistics',
+      user:             req.session.user,
+      totalPosted,
+      totalDelivered,
+      totalClaimed,
+      totalActive,
+      completionRate,
+      totalItems,
+      byCategory,
+      hasCategories:    byCategory.length > 0,
+      monthlyTrend,
+      topOrganizations,
+      hasTopOrgs:       topOrganizations.length > 0,
+    });
+  } catch (e) {
+    return res.status(500).render('error', {
+      pageTitle: 'Error',
+      user:      req.session.user,
       error:     e.message,
     });
   }
