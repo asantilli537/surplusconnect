@@ -2054,3 +2054,35 @@ select {
   height: 300px;
   width: 100%;
 }
+
+.marker-popup {
+  font-family: inherit;
+}
+
+.marker-popup .popup-title {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: #252c37;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.marker-popup .popup-donor {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #777c86;
+}
+
+.marker-popup .popup-button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+  background-color: var(--color-bg);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
