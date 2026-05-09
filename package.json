@@ -24,6 +24,7 @@
     "express": "^5.2.1",
     "express-handlebars": "^9.0.1",
     "express-session": "^1.19.0",
+    "leaflet": "^1.9.4",
     "mongodb": "^7.1.1",
     "xss": "^1.0.15"
   },

@@ -92,6 +92,10 @@ export const addMessage = async (transactionId, senderId, senderName, content) =
     throw new Error('this conversation is locked because the transaction is complete');
   }
 
+  if (thread.donorId !== cleanSenderId && thread.distributorId !== cleanSenderId) {
+    throw new Error('you are not authorized to send messages in this thread');
+  }
+
   const newMessage = {
     _id:        new ObjectId(),
     senderId:   cleanSenderId,

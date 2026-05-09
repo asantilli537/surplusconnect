@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { complaintsCollection } from '../config/mongoCollections.js';
-import * as h from '../helpers.js';
+import * as helpers from '../helpers.js';
 import { auditLogsCollection } from '../config/mongoCollections.js';
 
 /*
@@ -35,12 +35,12 @@ export const createComplaint = async (complaintData) => {
     complaint,
   } = complaintData;
 
-  const cleanFiledBy       = h.checkAndThrowId(String(filedById),       'filedById');
-  const cleanTxId          = h.checkAndThrowId(String(transactionId),    'transactionId');
-  const cleanListingId     = h.checkAndThrowId(String(listingId),        'listingId');
-  const cleanDonorId       = h.checkAndThrowId(String(donorId),          'donorId');
-  const cleanDistributorId = h.checkAndThrowId(String(distributorId),    'distributorId');
-  const cleanText          = h.checkAndThrowString(complaint, 'complaint', 10, 2000);
+  const cleanFiledBy       = helpers.checkAndThrowId(String(filedById),       'filedById');
+  const cleanTxId          = helpers.checkAndThrowId(String(transactionId),    'transactionId');
+  const cleanListingId     = helpers.checkAndThrowId(String(listingId),        'listingId');
+  const cleanDonorId       = helpers.checkAndThrowId(String(donorId),          'donorId');
+  const cleanDistributorId = helpers.checkAndThrowId(String(distributorId),    'distributorId');
+  const cleanText          = helpers.checkAndThrowString(complaint, 'complaint', 10, 2000);
 
   // only parties directly involved in the transaction can file
   if (cleanFiledBy !== cleanDonorId && cleanFiledBy !== cleanDistributorId) {
@@ -48,7 +48,7 @@ export const createComplaint = async (complaintData) => {
   }
 
   // sanitizing the complaint text before storing it
-  const safeText = h.sanitize(cleanText);
+  const safeText = helpers.sanitize(cleanText);
 
   const complaints = await complaintsCollection();
 
@@ -117,7 +117,7 @@ export const getAllComplaints = async (filters = {}) => {
 export const getComplaintById = async (id) => {
 
   /* Input Validation */
-  const cleanId = h.checkAndThrowId(String(id), 'complaintId');
+  const cleanId = helpers.checkAndThrowId(String(id), 'complaintId');
 
   const complaints = await complaintsCollection();
   const complaint  = await complaints.findOne({ _id: new ObjectId(cleanId) });
@@ -135,8 +135,8 @@ export const getComplaintById = async (id) => {
 export const resolveComplaint = async (complaintId, adminId) => {
 
   /* Input Validation */
-  const cleanComplaintId = h.checkAndThrowId(String(complaintId), 'complaintId');
-  const cleanAdminId     = h.checkAndThrowId(String(adminId),     'adminId');
+  const cleanComplaintId = helpers.checkAndThrowId(String(complaintId), 'complaintId');
+  const cleanAdminId     = helpers.checkAndThrowId(String(adminId),     'adminId');
 
   const complaints = await complaintsCollection();
   const complaint  = await complaints.findOne({ _id: new ObjectId(cleanComplaintId) });
@@ -174,4 +174,20 @@ export const resolveComplaint = async (complaintId, adminId) => {
   }
 
   return { resolved: true, complaintId: cleanComplaintId };
+};
+
+export const getRecentComplaints = async (limit = 5) => {
+
+  /* Input Validation */
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('limit must be a whole number between 1 and 100');
+  }
+
+  const complaints = await complaintsCollection();
+
+  return await complaints
+    .find({isResolved: false})
+    .sort({ filedAt: -1 })
+    .limit(limit)
+    .toArray();
 };

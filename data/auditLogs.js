@@ -1,5 +1,4 @@
 import { auditLogsCollection } from '../config/mongoCollections.js';
-import * as h from '../helpers.js';
 
 /*
   audit logs record every admin action taken on the platform.
