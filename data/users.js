@@ -132,13 +132,10 @@ export const createUser = async (userData) => {
     // so the ProPublica verification result is actually stored.
     // for all other roles isVerified defaults to true since they
     // do not require EIN verification.
-    isVerified:
-      cleanRole === "distributor"
-        ? typeof isVerified === "boolean"
-          ? isVerified
-          : false
-        : true,
-    createdAt: new Date().toISOString(),
+    isVerified: cleanRole === 'distributor'
+      ? (typeof isVerified === 'boolean' ? isVerified : false)
+      : true,
+    createdAt:   new Date().toISOString(),
   };
 
   const result = await users.insertOne(newUser);

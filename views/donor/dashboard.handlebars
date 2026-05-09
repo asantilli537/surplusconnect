@@ -48,7 +48,10 @@
   <section class="dashboard-section" aria-labelledby="recent-heading">
     <div class="section-header">
       <h2 class="section-title" id="recent-heading">recent donations</h2>
-      <a href="/donor/history" class="btn btn-ghost btn-sm">view all</a>
+      <div style="display:flex; gap: var(--space-2);">
+        <a href="/donor/stats" class="btn btn-secondary btn-sm">view stats</a>
+        <a href="/donor/history" class="btn btn-ghost btn-sm">view all</a>
+      </div>
     </div>
 
     {{#if hasRecentDonations}}

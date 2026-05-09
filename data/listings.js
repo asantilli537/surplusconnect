@@ -168,7 +168,20 @@ const generatePickupPin = () => {
 */
 export const createListing = async (donorId, listingData) => {
   /* Input Validation */
-  const cleanDonorId = h.checkAndThrowId(String(donorId), "donorId");
+  const cleanDonorId = h.checkAndThrowId(String(donorId), 'donorId');
+
+  // verifying the donor account exists, is actually a donor role, and is
+  // not suspended before creating any listing documents. this prevents
+  // orphaned listings if an account is deleted and stops suspended donors
+  // from posting new listings even if they somehow bypass route middleware.
+  const userCol = await usersCollection();
+  const donor   = await userCol.findOne(
+    { _id: new ObjectId(cleanDonorId), role: 'donor', isSuspended: false },
+    { projection: { _id: 1 } }
+  );
+  if (!donor) {
+    throw new Error('donor account not found or is not eligible to post listings');
+  }
 
   if (!listingData || typeof listingData !== "object") {
     throw new Error("listing data is required");
