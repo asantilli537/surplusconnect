@@ -291,7 +291,6 @@ router.route('/receipts/:id').get(requireLogin, async (req, res) => {
 router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
   try {
     const donorId  = req.session.user._id;
-    console.log(donorId);
     const listCol  = await listingsCollection();
     const txCol    = await transactionsCollection();
     const userCol  = await usersCollection();
@@ -301,8 +300,6 @@ router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
       .find({ donorId: new ObjectId(donorId) })
       .sort({ postedAt: -1 })
       .toArray();
-
-    console.log(allListings);
 
     // ---- overview stats ----
 
