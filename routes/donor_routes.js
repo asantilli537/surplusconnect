@@ -139,7 +139,8 @@ router.route('/listings/:id/edit')
       const listing = await getListingById(req.params.id);
 
       // making sure this donor owns the listing before showing the form
-      if (listing.donorId !== req.session.user._id) {
+
+      if (listing.donorId.toString() !== req.session.user._id) {
         return res.status(403).render('error', {
           pageTitle: 'Forbidden',
           user:      req.session.user,
@@ -290,15 +291,18 @@ router.route('/receipts/:id').get(requireLogin, async (req, res) => {
 router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
   try {
     const donorId  = req.session.user._id;
+    console.log(donorId);
     const listCol  = await listingsCollection();
     const txCol    = await transactionsCollection();
     const userCol  = await usersCollection();
 
     // fetching all listings for this donor as the base dataset
     const allListings = await listCol
-      .find({ donorId })
+      .find({ donorId: new ObjectId(donorId) })
       .sort({ postedAt: -1 })
       .toArray();
+
+    console.log(allListings);
 
     // ---- overview stats ----
 

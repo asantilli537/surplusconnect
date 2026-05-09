@@ -42,7 +42,7 @@ export const getAddressByCoordinates = async (street, city, state, zipCode) => {
     }
   };
 
-  const insert = await addressCollection.insertOne(newAddress);
+  const insertInfo = await addressCollection.insertOne(newAddress);
   if (!insertInfo.acknowledged || !insertInfo.insertedId) {
     throw new Error('Could not add new address to the database');
   }

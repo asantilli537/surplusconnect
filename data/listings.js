@@ -431,7 +431,7 @@ export const getListingsByDonor = async (donorId) => {
 
   const listings = await listingsCollection();
   const donorListings = await listings
-    .find({ donorId: cleanId })
+    .find({ donorId: new ObjectId(cleanId)})
     .sort({ postedAt: -1 })
     .toArray();
 
