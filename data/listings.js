@@ -518,6 +518,14 @@ export const updateListing = async (listingId, donorId, updateData) => {
     );
   }
 
+  // check address fields and update address if different
+  if (updateData.street && updateData.city && updateData.state && updateData.zipCode) {
+    const newAddressId = getAddressByCoordinates(updateData.street, updateData.city, updateData.state, updateData.zipCode);
+    if (listing.addressId.toString() !== newAddressId) {
+      updateFields.addressId = new ObjectId(newAddressId);
+    }
+  }
+
   // checking time logic on any updated time fields
   const effectiveStart =
     updateFields.pickupStartTime || listing.pickupStartTime;
