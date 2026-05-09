@@ -332,9 +332,6 @@ export const getAllActiveListings = async (filters = {}) => {
   if (filters.sort === "newest") sortField = { postedAt: -1 };
   if (filters.sort === "quantity") sortField = { priorityScore: -1 };
 
-  /*const allListings = await listings.find(query).sort(sortField).toArray();
-  return allListings;*/
-
   const allListings = await listings
     .aggregate([
       { $match: query },
