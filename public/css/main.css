@@ -2067,13 +2067,13 @@ select {
   line-height: 1.2;
 }
 
-.surplus-popup .popup-donor {
+.marker-popup .popup-donor {
   margin: 0 0 12px 0;
   font-size: 13px;
   color: #777c86;
 }
 
-.surplus-popup .popup-button {
+.marker-popup .popup-button {
   display: block;
   width: 100%;
   text-align: center;
