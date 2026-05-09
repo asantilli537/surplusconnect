@@ -1,6 +1,6 @@
 import {ObjectId} from "mongodb";
 import {addressesCollection} from "../config/mongoCollections.js";
-import * as helpers from "../helpers.js";
+import * as h from "../helpers.js";
 
 export const getAddressByCoordinates = async (street, city, state, zipCode) => {
     if (!street || !city || !state || !zipCode) {
@@ -26,7 +26,7 @@ export const getAddressByCoordinates = async (street, city, state, zipCode) => {
 
   let address;
   try {
-    address = await helpers.geocodeAddress(street, city, state, zipCode);
+    address = await h.geocodeAddress(street, city, state, zipCode);
   } catch(e) {
     throw new Error(e.message);
   }
@@ -48,4 +48,18 @@ export const getAddressByCoordinates = async (street, city, state, zipCode) => {
   }
 
   return insertInfo.insertedId;
+};
+
+/*
+  Return an address object based on its addressId.
+  Used in the edit-listing to populate the listing's information. 
+  Passes if the id is in string format. (Not an ObjectId, should be cleaned before being put through).
+*/
+export const getAddressById = async (id) => {
+  const cleanId = h.checkAndThrowId(String(id), "addressId");
+  const addresses = await addressesCollection();
+  const address = await addresses.findOne({ _id: new ObjectId(cleanId) });
+
+  if (!address) throw new Error("address not found");
+  return address;
 };
