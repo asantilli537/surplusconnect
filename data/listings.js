@@ -245,7 +245,7 @@ export const createListing = async (donorId, listingData) => {
 
   const listings = await listingsCollection();
 
-  const newAddressId = await getAddressByCooridinates(
+  const newAddressId = await getAddressByCoordinates(
     cleanStreet,
     cleanCity,
     cleanState,
