@@ -26,14 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const marker = L.marker([listing.latitude, listing.longitude]).addTo(map);
 
     const popupHtml = `
-      <div style="font-family: 'Inter', sans-serif;">
-        <h3 style="margin: 0 0 5px 0; font-size: 16px;">${listing.title}</h3>
-        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
-          Donated by: <strong>${listing.donorName}</strong>
-        </p>
-        <a href="/listings/${listing._id}" 
-           style="display: inline-block; padding: 5px 10px; background: #2c3e50; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 600;">
-           View Details
+      <div class="marker-popup">
+        <h3 class="popup-title">${listing.title}</h3>
+        <p class="popup-donor">By <strong>${listing.donorName}</strong></p>
+        <a href="/listings/${listing._id}" class="popup-button">
+          View Details
         </a>
       </div>
     `;
