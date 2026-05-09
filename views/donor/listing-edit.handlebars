@@ -74,7 +74,21 @@
               </div>
               <div class="form-group">
                 <label class="form-label form-label--required">unit</label>
-                <input class="form-input" type="text" name="items[{{@index}}][unit]" required maxlength="20" value="{{this.unit}}" />
+                  <select
+                    class="form-select"
+                    id="items[{{@index}}][unit]"
+                    name="items[{{@index}}][unit]"
+                    value="{{this.unit}}"
+                    required
+                  >
+                    <option value="pieces">pieces</option>
+                    <option value="trays">trays</option>
+                    <option value="pounds">pounds</option>
+                    <option value="boxes">boxes</option>
+                    <option value="bags">bags</option>
+                    <option value="gallons">gallons</option>
+                    <option value="servings">servings</option>
+                  </select>
               </div>
             </div>
           {{/each}}
