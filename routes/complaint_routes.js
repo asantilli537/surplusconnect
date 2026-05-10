@@ -3,6 +3,7 @@ import { requireLogin } from '../middleware.js';
 import { createComplaint } from '../data/complaints.js';
 import { transactionsCollection } from '../config/mongoCollections.js';
 import { ObjectId } from 'mongodb';
+import xss from 'xss';
 
 const router = Router();
 
@@ -18,10 +19,10 @@ const router = Router();
 
 router.route('/complaints/new').get(requireLogin, async (req, res) => {
   try {
-    const { transactionId } = req.query;
+    const transactionId = xss(req.query.transactionId || '').trim();
 
     // transactionId is required to scope the complaint to a transaction
-    if (!transactionId || typeof transactionId !== 'string' || transactionId.trim().length === 0) {
+    if (!transactionId) {
       return res.status(400).render('error', {
         pageTitle: 'Bad Request',
         user:      req.session.user,
@@ -33,7 +34,7 @@ router.route('/complaints/new').get(requireLogin, async (req, res) => {
     const txCol = await transactionsCollection();
     let tx;
     try {
-      tx = await txCol.findOne({ _id: new ObjectId(transactionId.trim()) });
+      tx = await txCol.findOne({ _id: new ObjectId(transactionId) });
     } catch (e) {
       return res.status(400).render('error', {
         pageTitle: 'Bad Request',
@@ -94,7 +95,11 @@ router.route('/complaints/new').get(requireLogin, async (req, res) => {
 // ---- submit complaint form ----
 
 router.route('/complaints/new').post(requireLogin, async (req, res) => {
-  const { transactionId, listingId, donorId, distributorId, complaint } = req.body;
+  const transactionId = xss(req.body.transactionId || '').trim();
+  const listingId = xss(req.body.listingId || '').trim();
+  const donorId = xss(req.body.donorId || '').trim();
+  const distributorId = xss(req.body.distributorId || '').trim();
+  const complaint = xss(req.body.complaint || '').trim();
 
   // route-level presence checks before calling data function
   if (!transactionId || !listingId || !donorId || !distributorId) {
@@ -105,7 +110,7 @@ router.route('/complaints/new').post(requireLogin, async (req, res) => {
     });
   }
 
-  if (!complaint || typeof complaint !== 'string' || complaint.trim().length === 0) {
+  if (!complaint || typeof complaint !== 'string' || complaint.length === 0) {
     return res.status(400).render('complaint/new', {
       pageTitle:     'File a Complaint',
       user:          req.session.user,
@@ -118,7 +123,7 @@ router.route('/complaints/new').post(requireLogin, async (req, res) => {
     });
   }
 
-  if (complaint.trim().length < 10) {
+  if (complaint.length < 10) {
     return res.status(400).render('complaint/new', {
       pageTitle:     'File a Complaint',
       user:          req.session.user,
@@ -138,7 +143,7 @@ router.route('/complaints/new').post(requireLogin, async (req, res) => {
       listingId,
       donorId,
       distributorId,
-      complaint:     complaint.trim(),
+      complaint,
     });
 
     // redirecting to the appropriate dashboard after filing
