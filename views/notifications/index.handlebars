@@ -21,7 +21,7 @@
           >
             <div class="notification-content">
               <p class="notification-message">{{this.message}}</p>
-              <span class="notification-time">{{this.sentTime}}</span>
+              <span class="notification-time">{{formatDate this.sentTime}}</span>
             </div>
             {{#unless this.isRead}}
               <span class="notification-dot" aria-label="unread"></span>
