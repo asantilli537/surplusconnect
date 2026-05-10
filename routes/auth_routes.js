@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireGuest } from '../middleware.js';
 import { createUser, loginUser } from '../data/users.js';
 import { getNotificationsForUser, markAllAsRead } from '../data/notifications.js';
+import xss from 'xss';
 
 
 /*
@@ -162,7 +163,8 @@ router.route('/login')
     });
   })
   .post(async (req, res) => {
-    const { email, password } = req.body;
+    const email = xss(req.body.email || '');
+    const password = req.body.password;
 
     // route-level check before calling the data function
     if (!email || !password ||
@@ -234,7 +236,7 @@ router.route('/signup/donor')
 
     // route-level presence check before anything else
     for (const field of donorRequiredFields) {
-      if (!req.body[field] || String(req.body[field]).trim().length === 0) {
+      if (!req.body[field] || typeof req.body[field] !== 'string' || req.body[field].trim().length === 0) {
         return res.status(400).render('auth/signup-donor', {
           pageTitle:    'Register as a Food Donor',
           user:         null,
@@ -256,8 +258,22 @@ router.route('/signup/donor')
       });
     }
 
+    const cleanData = {
+      firstName:        xss(req.body.firstName),
+      lastName:         xss(req.body.lastName),
+      email:            xss(req.body.email),
+      phoneNumber:      xss(req.body.phoneNumber),
+      organizationName: xss(req.body.organizationName),
+      street:           xss(req.body.street),
+      city:             xss(req.body.city),
+      state:            xss(req.body.state),
+      zipCode:          xss(req.body.zipCode),
+      tags: req.body.tags ? xss(req.body.tags) : '',
+      password:         req.body.password,
+    };
+
     try {
-      await createUser({ ...req.body, role: 'donor' });
+      await createUser({ ...cleanData, role: 'donor' });
       return res.redirect('/login');
     } catch (e) {
       return res.status(400).render('auth/signup-donor', {
@@ -289,7 +305,7 @@ router.route('/signup/distributor')
   .post(async (req, res) => {
 
     for (const field of distributorRequiredFields) {
-      if (!req.body[field] || String(req.body[field]).trim().length === 0) {
+      if (!req.body[field] || typeof req.body[field] !== 'string' || req.body[field].trim().length === 0) {
         return res.status(400).render('auth/signup-distributor', {
           pageTitle:    'Register as a Distributor',
           user:         null,
@@ -310,6 +326,21 @@ router.route('/signup/distributor')
       });
     }
 
+    const cleanData = {
+      firstName:        xss(req.body.firstName),
+      lastName:         xss(req.body.lastName),
+      email:            xss(req.body.email),
+      phoneNumber:      xss(req.body.phoneNumber),
+      organizationName: xss(req.body.organizationName),
+      einNumber:        xss(req.body.einNumber),
+      street:           xss(req.body.street),
+      city:             xss(req.body.city),
+      state:            xss(req.body.state),
+      zipCode:          xss(req.body.zipCode),
+      tags:             req.body.tags ? xss(req.body.tags) : '',
+      password:         req.body.password,
+    };
+
     try {
       /*
         verifying the EIN before creating the account. this call
@@ -326,7 +357,7 @@ router.route('/signup/distributor')
       }
 
       await createUser({
-        ...req.body,
+        ...cleanData,
         role:             'distributor',
         isVerified:       verified,
         verifiedOrgName:  verifiedOrgName || null,
@@ -366,7 +397,7 @@ router.route('/signup/volunteer')
   .post(async (req, res) => {
 
     for (const field of volunteerRequiredFields) {
-      if (!req.body[field] || String(req.body[field]).trim().length === 0) {
+      if (!req.body[field] || typeof req.body[field] !== 'string' || req.body[field].trim().length === 0) {
         return res.status(400).render('auth/signup-volunteer', {
           pageTitle:    'Register as a Volunteer Courier',
           user:         null,
@@ -387,8 +418,20 @@ router.route('/signup/volunteer')
       });
     }
 
+    const cleanData = {
+      firstName:        xss(req.body.firstName),
+      lastName:         xss(req.body.lastName),
+      email:            xss(req.body.email),
+      phoneNumber:      xss(req.body.phoneNumber),
+      street:           xss(req.body.street),
+      city:             xss(req.body.city),
+      state:            xss(req.body.state),
+      zipCode:          xss(req.body.zipCode),
+      password:         req.body.password,
+    };
+
     try {
-      await createUser({ ...req.body, role: 'volunteer' });
+      await createUser({ ...cleanData, role: 'volunteer' });
       return res.redirect('/login');
     } catch (e) {
       return res.status(400).render('auth/signup-volunteer', {

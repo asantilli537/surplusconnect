@@ -15,6 +15,7 @@ import {
   complaintsCollection,
 } from '../config/mongoCollections.js';
 import { ObjectId } from 'mongodb';
+import xss from 'xss';
 
 const router = Router();
 
@@ -83,7 +84,8 @@ router.route('/admin/dashboard').get(requireRole('admin'), async (req, res) => {
 
 router.route('/admin/users').get(requireRole('admin'), async (req, res) => {
   try {
-    const { role, status } = req.query;
+    const role = req.query.role ? xss(req.query.role) : undefined;
+    const status = req.query.status ? xss(req.query.status) : undefined;
 
     // building filters from query params, ignoring empty or missing values
     const filters = {};
@@ -148,7 +150,7 @@ router.route('/admin/users/:id/unsuspend').post(requireRole('admin'), async (req
 
 router.route('/admin/complaints').get(requireRole('admin'), async (req, res) => {
   try {
-    const { status } = req.query;
+    const status = req.query.status ? xss(req.query.status) : undefined;
 
     const filters = {};
     if (status && typeof status === 'string' && status.trim().length > 0) {
@@ -249,7 +251,7 @@ router.route('/admin/complaints/:id/resolve').post(requireRole('admin'), async (
 
 router.route('/admin/audit-log').get(requireRole('admin'), async (req, res) => {
   try {
-    const { action } = req.query;
+    const action = req.query.action ? xss(req.query.action) : undefined;
 
     const filters = {};
     if (action && typeof action === 'string' && action.trim().length > 0) {
