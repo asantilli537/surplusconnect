@@ -278,3 +278,24 @@ export const geocodeAddress = async (street, city, state, zipCode) => {
     throw new Error(`Geocoding failed: ${e.message}`);
   }
 };
+
+export const sanitizeListingBody = (body) => {
+  const cleanBody = {};
+  for (const key in body) {
+    if (key !== 'items') {
+      cleanBody[key] = xss(String(body[key] || '')).trim();
+    }
+  }
+  const rawItems = body.items;
+  const itemArray = Array.isArray(rawItems)
+    ? rawItems
+    : rawItems
+      ? [rawItems]
+      : [];
+  cleanBody.items = itemArray.map((item) => ({
+    name: xss(String(item.name || '')).trim(),
+    quantity: xss(String(item.quantity || '')).trim(),
+    unit: xss(String(item.unit || '')).trim(),
+  }));
+  return cleanBody;
+};

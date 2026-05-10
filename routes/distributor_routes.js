@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
+import xss from 'xss';
 import { requireRole } from '../middleware.js';
 import { getUserById } from '../data/users.js';
 import {
@@ -71,8 +73,13 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
     }
 
     // reading PIN error state from query params set by the verify-pin redirect
-    const pinError          = req.query.pinError   || null;
-    const pinErrorListingId = req.query.listingId  || null;
+    const pinError = req.query.pinError
+      ? xss(req.query.pinError).trim()
+      : null;
+
+    const pinErrorListingId = req.query.listingId
+      ? xss(req.query.listingId).trim()
+      : null;
 
     return res.render('distributor/dashboard', {
       pageTitle:          'Distributor Dashboard',
@@ -101,14 +108,19 @@ router.route('/distributor/dashboard').get(requireRole('distributor'), async (re
 
 router.route('/listings').get(requireRole('distributor'), async (req, res) => {
   try {
-    const { category, sort } = req.query;
+    const category = xss(req.query.category || '').trim();
+    const sort = xss(req.query.sort || '').trim();
+
+    const validSorts = ['priority', 'newest', 'expiring'];
 
     const filters = {};
-    if (category && typeof category === 'string' && category.trim().length > 0) {
-      filters.category = category.trim();
+
+    if (category.length > 0) {
+      filters.category = category;
     }
-    if (sort && typeof sort === 'string' && sort.trim().length > 0) {
-      filters.sort = sort.trim();
+
+    if (sort.length > 0 && validSorts.includes(sort)) {
+      filters.sort = sort;
     }
 
     const activeListings = await getAllActiveListings(filters, req.session.user._id);
@@ -145,7 +157,8 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
 
 router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
   try {
-    const listing = await getListingById(req.params.id);
+    const listingId = xss(req.params.id || '').trim();
+    const listing = await getListingById(listingId);
     const address = await getAddressById(listing.addressId.toString());
 
     // pickupAddress to display information
@@ -180,7 +193,8 @@ router.route('/listings/:id').get(requireRole('distributor'), async (req, res) =
 
 router.route('/listings/:id/claim').post(requireRole('distributor'), async (req, res) => {
   try {
-    const result = await claimListing(req.params.id, req.session.user._id);
+    const listingId = xss(req.params.id || '').trim();
+    const result = await claimListing(listingId, req.session.user._id);
     return res.redirect(`/chat/${result.transactionId}`);
   } catch (e) {
     return res.status(400).render('error', {
@@ -201,10 +215,12 @@ router.route('/listings/:id/claim').post(requireRole('distributor'), async (req,
 */
 router.route('/transactions/:id/verify-pin').post(requireRole('distributor'), async (req, res) => {
   try {
-    const { listingId, enteredPin } = req.body;
+    const transactionId = xss(req.params.id || '').trim();
+    const listingId = xss(req.body.listingId || '').trim();
+    const enteredPin = xss(req.body.enteredPin || '').trim();
 
     // checking listingId first since it appears in all error redirects
-    if (!listingId || typeof listingId !== 'string' || listingId.trim().length === 0) {
+    if (!listingId) {
       return res.status(400).render('error', {
         pageTitle: 'Bad Request',
         user:      req.session.user,
@@ -213,22 +229,23 @@ router.route('/transactions/:id/verify-pin').post(requireRole('distributor'), as
     }
 
     // validating PIN presence before hitting the database
-    if (!enteredPin || typeof enteredPin !== 'string' || enteredPin.trim().length === 0) {
+    if (!enteredPin) {
       return res.redirect(
-        `/distributor/dashboard?pinError=${encodeURIComponent('please enter the pickup PIN')}&listingId=${listingId}`
+        `/distributor/dashboard?pinError=${encodeURIComponent('please enter the pickup PIN')}&listingId=${encodeURIComponent(listingId)}`
       );
     }
 
     // enforcing exactly 4 numeric digits to block padding and injection attempts
-    if (!/^\d{4}$/.test(enteredPin.trim())) {
+    if (!/^\d{4}$/.test(enteredPin)) {
       return res.redirect(
-        `/distributor/dashboard?pinError=${encodeURIComponent('PIN must be exactly 4 digits')}&listingId=${listingId}`
+        `/distributor/dashboard?pinError=${encodeURIComponent('PIN must be exactly 4 digits')}&listingId=${encodeURIComponent(listingId)}`
       );
     }
 
     const txCol = await transactionsCollection();
     const tx    = await txCol.findOne({
-      listingId:     listingId.trim(),
+      _id:           new ObjectId(transactionId),
+      listingId,
       distributorId: req.session.user._id,
       status:        'claimed',
     });
@@ -242,14 +259,14 @@ router.route('/transactions/:id/verify-pin').post(requireRole('distributor'), as
     }
 
     // string comparison preserves leading zeros in PINs like 0847
-    if (enteredPin.trim() !== tx.pickupPin) {
+    if (enteredPin !== tx.pickupPin) {
       return res.redirect(
-        `/distributor/dashboard?pinError=${encodeURIComponent('incorrect PIN. please check with the donor.')}&listingId=${listingId}`
+        `/distributor/dashboard?pinError=${encodeURIComponent('incorrect PIN. please check with the donor.')}&listingId=${encodeURIComponent(listingId)}`
       );
     }
 
     // PIN verified, marking the listing as delivered
-    await markListingDelivered(listingId.trim(), req.session.user._id);
+    await markListingDelivered(listingId, req.session.user._id);
     return res.redirect('/distributor/dashboard');
   } catch (e) {
     return res.status(500).render('error', {
