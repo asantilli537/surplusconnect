@@ -1,4 +1,4 @@
-import xss from 'xss';
+
 import { Router } from 'express';
 import { requireRole } from '../middleware.js';
 import { getAllActiveListings } from '../data/listings.js';
