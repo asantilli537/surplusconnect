@@ -2079,7 +2079,7 @@ select {
   text-align: center;
   padding: 8px 0;
   background-color: var(--color-bg);
-  color: #ffffff;
+  color: var(--color-text);
   text-decoration: none;
   border-radius: 6px;
   font-size: 13px;

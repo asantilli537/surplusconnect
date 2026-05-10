@@ -42,7 +42,7 @@ export const createNotification = async (userId, type, message) => {
   const notifications = await notificationsCollection();
 
   const newNotification = {
-    userId:   cleanUserId,
+    userId:   new ObjectId(cleanUserId),
     type:     type.trim(),
     message:  safeMessage,
     isRead:   false,

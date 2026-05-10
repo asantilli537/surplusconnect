@@ -10,6 +10,7 @@ import {
 } from '../data/listings.js';
 import { getReceiptById, getReceiptsByDonor } from '../data/receipts.js';
 import { listingsCollection, transactionsCollection, usersCollection } from '../config/mongoCollections.js';
+import { getAddressByCoordinates, getAddressById } from '../data/addresses.js';
 
 const router = Router();
 
@@ -137,6 +138,9 @@ router.route('/listings/:id/edit')
   .get(requireRole('donor'), async (req, res) => {
     try {
       const listing = await getListingById(req.params.id);
+      const address = await getAddressById(listing.addressId.toString());
+      // set address to the listing so we can populate the edit form
+      listing.pickupAddress = address;
 
       // making sure this donor owns the listing before showing the form
 
@@ -156,7 +160,7 @@ router.route('/listings/:id/edit')
           error:     'only active listings can be edited',
         });
       }
-
+      
       return res.render('donor/listing-edit', {
         pageTitle:   'Edit Listing',
         user:        req.session.user,
@@ -291,7 +295,6 @@ router.route('/receipts/:id').get(requireLogin, async (req, res) => {
 router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
   try {
     const donorId  = req.session.user._id;
-    console.log(donorId);
     const listCol  = await listingsCollection();
     const txCol    = await transactionsCollection();
     const userCol  = await usersCollection();
@@ -301,8 +304,6 @@ router.route('/donor/stats').get(requireRole('donor'), async (req, res) => {
       .find({ donorId: new ObjectId(donorId) })
       .sort({ postedAt: -1 })
       .toArray();
-
-    console.log(allListings);
 
     // ---- overview stats ----
 

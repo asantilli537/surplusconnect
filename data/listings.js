@@ -460,7 +460,7 @@ export const updateListing = async (listingId, donorId, updateData) => {
   if (!listing) throw new Error("listing not found");
 
   // verifying ownership before allowing any modifications
-  if (listing.donorId !== cleanDonorId) {
+  if (listing.donorId.toString() !== cleanDonorId) {
     throw new Error("you do not have permission to edit this listing");
   }
   if (listing.status !== "active") {
@@ -516,6 +516,14 @@ export const updateListing = async (listingId, donorId, updateData) => {
       updateData.expirationTime,
       "expirationTime",
     );
+  }
+
+  // check address fields and update address if different
+  if (updateData.street && updateData.city && updateData.state && updateData.zipCode) {
+    const newAddressId = getAddressByCoordinates(updateData.street, updateData.city, updateData.state, updateData.zipCode);
+    if (listing.addressId.toString() !== newAddressId) {
+      updateFields.addressId = new ObjectId(newAddressId);
+    }
   }
 
   // checking time logic on any updated time fields
