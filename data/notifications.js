@@ -42,7 +42,7 @@ export const createNotification = async (userId, type, message) => {
   const notifications = await notificationsCollection();
 
   const newNotification = {
-    userId:   new ObjectId(cleanUserId),
+    userId:   cleanUserId,
     type:     type.trim(),
     message:  safeMessage,
     isRead:   false,
@@ -129,7 +129,7 @@ export const markAsRead = async (notificationId, userId) => {
   if (!notif) throw new Error('notification not found');
 
   // making sure users can only mark their own notifications as read
-  if (notif.userId !== cleanUserId) {
+  if (notif.userId.toString() !== cleanUserId) {
     throw new Error('you do not have permission to modify this notification');
   }
 
