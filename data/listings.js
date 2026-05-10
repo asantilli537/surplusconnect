@@ -618,7 +618,7 @@ export const deleteListing = async (listingId, donorId) => {
 
   if (!listing) throw new Error("listing not found");
 
-  if (listing.donorId !== cleanDonorId) {
+  if (listing.donorId.toString() !== cleanDonorId) {
     throw new Error("you do not have permission to delete this listing");
   }
   if (listing.status !== "active") {
