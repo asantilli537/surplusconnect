@@ -111,7 +111,7 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
     const category = xss(req.query.category || '').trim();
     const sort = xss(req.query.sort || '').trim();
 
-    const validSorts = ['priority', 'newest', 'expiring'];
+    const validSorts = ["priority", "expiration", "distance", "quantity", "newest"];
 
     const filters = {};
 

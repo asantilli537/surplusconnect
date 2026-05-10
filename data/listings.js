@@ -461,6 +461,7 @@ export const getAllActiveListings = async (filters = {}, id = null) => {
     } 
     result.sort((a, b) => a.distanceFactor - b.distanceFactor);
   }
+
   return result;
 };
 
