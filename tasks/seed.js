@@ -342,7 +342,7 @@ const main = async () => {
       lastName: "Chen",
       email: "maria@communityfoodbank.org",
       phoneNumber: "212-555-0202",
-      hashedPassword: distributorPw,
+      hashedPassword: distributorPw1,
       role: "distributor",
       organizationName: "Hoboken Community Center",
       einNumber: "13-1234567",
@@ -466,7 +466,7 @@ const main = async () => {
       foodCategory: "prepared",
       notes:
         "Bring your own containers. Container provided only for the coffee. Ask for Philip at the front desk.",
-      addressId: new ObjectId("69febf5c8127a82eb84c0990"),
+      addressId: new ObjectId("69feb389a2c903a408461c60"),
       status: "delivered",
       postedAt: "2026-05-10T22:30:00.000Z",
       pickupStart: "2026-05-10T23:00:00.000Z",
@@ -476,11 +476,11 @@ const main = async () => {
       priorityScore: 85,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d11'),
       donorId: new ObjectId("69febf5c8127a82eb84c0991"),
       title: "Surplus Sandwiches and Fries",
       description:
-        "Individually wrapped turkey and ham sandwiches from our lunch rush, plus several trays of fries.",
+        "Smashed chicken sandwiches and trays of fries.",
       items: [
         { name: "Assorted Sandwiches", quantity: 15, unit: "pieces" },
         { name: "French Fries", quantity: 3, unit: "trays" },
@@ -498,18 +498,18 @@ const main = async () => {
       priorityScore: 45,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d12'),
       donorId: new ObjectId("69febf5c8127a82eb84c0992"),
       title: "End of Day Pizza Slices",
       description:
-        "Leftover cheese and pepperoni slices kept warm under the counter.",
+        "Leftover cheese and pepperoni slices.",
       items: [
         { name: "Cheese Slices", quantity: 20, unit: "pieces" },
         { name: "Pepperoni Slices", quantity: 15, unit: "pieces" },
         { name: "Garlic Knots", quantity: 40, unit: "pieces" },
       ],
       foodCategory: "prepared",
-      notes: "Boxed up and ready to go. Park out front with your flashers on.",
+      notes: "Boxed up and ready to go. Parking lot is across the street. Ask for Sal.",
       addressId: new ObjectId("69feb389a2c903a408461c62"),
       status: "active",
       postedAt: "2026-05-09T14:30:00.000Z",
@@ -520,7 +520,7 @@ const main = async () => {
       priorityScore: 55,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d13'),
       donorId: new ObjectId("69febf5c8127a82eb84c0993"),
       title: "Chicken and Rice Platters",
       description: "Freshly made chicken over yellow rice with salad.",
@@ -541,7 +541,7 @@ const main = async () => {
       priorityScore: 65,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d14'),
       donorId: new ObjectId("69febf5c8127a82eb84c0994"),
       title: "Assorted Tacos and Sides",
       description:
@@ -563,11 +563,11 @@ const main = async () => {
       priorityScore: 85,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d15'),
       donorId: new ObjectId("69febf5c8127a82eb84c0995"),
       title: "Dumplings and Lo Mein",
       description:
-        "Excess prep from our morning shift. All securely packaged in takeout containers.",
+        "All securely packaged in takeout containers.",
       items: [
         { name: "Pork Dumplings", quantity: 80, unit: "pieces" },
         { name: "Vegetable Lo Mein", quantity: 5, unit: "trays" },
@@ -585,7 +585,7 @@ const main = async () => {
       priorityScore: 50,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d16'),
       donorId: new ObjectId("69febf5c8127a82eb84c0996"),
       title: "Gourmet Seafood Bisque and Rolls",
       description: "High-quality lobster bisque and house-baked dinner rolls.",
@@ -606,7 +606,7 @@ const main = async () => {
       priorityScore: 35,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d17'),
       donorId: new ObjectId("69febf5c8127a82eb84c0997"),
       title: "Fresh Vegan Bowls",
       description:
@@ -627,7 +627,7 @@ const main = async () => {
       priorityScore: 25,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d18'),
       donorId: new ObjectId("69febf5c8127a82eb84c0998"),
       title: "Organic Gluten-Free Muffins",
       description:
@@ -648,7 +648,7 @@ const main = async () => {
       priorityScore: 20,
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('69ff4a66a68cde75eba72d19'),
       donorId: new ObjectId("69febf5c8127a82eb84c0999"),
       title: "Fresh Baked Bread and Pastries",
       description:
