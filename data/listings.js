@@ -78,7 +78,7 @@ const parseAndValidateItems = (items) => {
     if (isNaN(qty) || qty <= 0 || !Number.isFinite(qty)) {
       throw new Error(`item[${idx}].quantity must be a positive number`);
     }
-    if (qty > 100000) {
+    if (qty > 5000) {
       throw new Error(`item[${idx}].quantity is unrealistically large`);
     }
 
