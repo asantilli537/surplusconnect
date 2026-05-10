@@ -31,8 +31,12 @@ const STOP_WORDS = new Set([
   "org",
   "ngo",
   "npo",
+  "&"
 ]);
 
+/*
+  Default usage: submitted name, known name
+*/
 const orgNamesOverlap = (nameA, nameB) => {
   if (!nameA || !nameB) return false;
 
@@ -45,9 +49,14 @@ const orgNamesOverlap = (nameA, nameB) => {
 
   const wordsA = new Set(tokenize(nameA));
   const wordsB = tokenize(nameB);
+  const MAX_WORDS = 5;
 
-  // at least one significant word must appear in both names
-  return wordsB.some((w) => wordsA.has(w));
+  // check the names for the number of matching words.
+  // For names less than MAX_WORDS (5) words long, all words must match.
+  // If an organization is longer, only 5 words need to match.
+  const matches = wordsB.filter(w => wordsA.has(w)).length; 
+  if (wordsB.length <= MAX_WORDS) return (matches === wordsB.length);
+  return (matches >= MAX_WORDS);
 };
 
 /*

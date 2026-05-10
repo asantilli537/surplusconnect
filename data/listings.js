@@ -443,7 +443,6 @@ export const getAllActiveListings = async (filters = {}, id = null) => {
   // get the latitute and longitude of each object in the array
   // compare them all with the latitute and longitude of the user's marked location
   // sort them based on the difference of each
-  console.log(filters.sort);
   if (filters.sort === "distance") {
     const userId = h.checkAndThrowId(id, "userId");
     const thisUser = await getUserById(userId);
