@@ -78,7 +78,7 @@ const parseAndValidateItems = (items) => {
     if (isNaN(qty) || qty <= 0 || !Number.isFinite(qty)) {
       throw new Error(`item[${idx}].quantity must be a positive number`);
     }
-    if (qty > 100000) {
+    if (qty > 5000) {
       throw new Error(`item[${idx}].quantity is unrealistically large`);
     }
 
@@ -565,7 +565,7 @@ export const updateListing = async (listingId, donorId, updateData) => {
 
   // check address fields and update address if different
   if (updateData.street && updateData.city && updateData.state && updateData.zipCode) {
-    const newAddressId = getAddressByCoordinates(updateData.street, updateData.city, updateData.state, updateData.zipCode);
+    const newAddressId = await getAddressByCoordinates(updateData.street, updateData.city, updateData.state, updateData.zipCode);
     if (listing.addressId.toString() !== newAddressId) {
       updateFields.addressId = new ObjectId(newAddressId);
     }
