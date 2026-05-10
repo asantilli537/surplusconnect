@@ -145,6 +145,26 @@ export const checkRoleValidity = (role) => {
   return validRoles.includes(role.trim().toLowerCase());
 };
 
+/*
+  For the listing sorting, calculates the distance between two location objects.
+  This returns a distance number used internally, does not return a specific unit.
+*/
+
+export const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  let numsList = [lat1, lon1, lat2, lon2];
+  for (const i of numsList) {
+    if (typeof i !== "number" || isNaN(i) || i < -90 || i > 90) {
+      throw new Error("longitudes and latitudes must be valid numbers between -90 and 90");
+    }
+  }
+
+  // grabs the distance, assuming flatness due to (relatively) small distances/
+  const lat_distance = lat1 - lat2;
+  const lon_distance = lon1 - lon2;
+  const distanceFactor = Math.sqrt((lat_distance * lat_distance) + (lon_distance * lon_distance));
+  return distanceFactor;
+};
+
 export const checkAndThrowRole = (role) => {
   if (!checkRoleValidity(role)) {
     throw new Error(`role must be one of: ${validRoles.join(", ")}`);

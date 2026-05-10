@@ -35,6 +35,7 @@
         <select class="form-select filter-select" id="sort" name="sort">
           <option value="priority"   {{#if_eq filterSort 'priority'}}selected{{/if_eq}}>priority score</option>
           <option value="expiration" {{#if_eq filterSort 'expiration'}}selected{{/if_eq}}>expiring soonest</option>
+          <option value="distance"   {{#if_eq filterSort 'distance'}}selected{{/if_eq}}>distance</option>
           <option value="quantity"   {{#if_eq filterSort 'quantity'}}selected{{/if_eq}}>largest quantity</option>
           <option value="newest"     {{#if_eq filterSort 'newest'}}selected{{/if_eq}}>newest first</option>
         </select>
