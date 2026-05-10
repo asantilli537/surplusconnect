@@ -9,6 +9,7 @@ import {
 } from '../data/listings.js';
 import { transactionsCollection } from '../config/mongoCollections.js';
 import { getReceiptByTransaction } from '../data/receipts.js';
+import { getAddressById } from '../data/addresses.js';
 
 const router = Router();
 
@@ -110,7 +111,7 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
       filters.sort = sort.trim();
     }
 
-    const activeListings = await getAllActiveListings(filters);
+    const activeListings = await getAllActiveListings(filters, req.session.user._id);
 
     const mapData = activeListings.map(listing => ({
       _id:       listing._id,
@@ -145,6 +146,10 @@ router.route('/listings').get(requireRole('distributor'), async (req, res) => {
 router.route('/listings/:id').get(requireRole('distributor'), async (req, res) => {
   try {
     const listing = await getListingById(req.params.id);
+    const address = await getAddressById(listing.addressId.toString());
+
+    // pickupAddress to display information
+    listing.pickupAddress = address;
 
     let donor = null;
     try {

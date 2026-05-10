@@ -11,6 +11,8 @@ import { getAllUsers } from "./users.js";
 import { getAddressByCoordinates } from "./addresses.js";
 import * as h from "../helpers.js";
 import { createReceipt } from "./receipts.js";
+import { getUserById } from "./users.js";
+import { getAddressById } from "./addresses.js";
 
 /*
   listings are the core of SurplusConnect. donors create them,
@@ -314,9 +316,10 @@ export const getListingById = async (id) => {
 /*
   returns active listings sorted by priority score by default.
   supports optional category and sort filters from the browse page.
+  inputs the distributor's id to be used to calculate their distance.
   distributors call this when browsing available food.
 */
-export const getAllActiveListings = async (filters = {}) => {
+export const getAllActiveListings = async (filters = {}, id = null) => {
   /* Input Validation */
   if (typeof filters !== "object" || filters === null) {
     throw new Error("filters must be an object");
@@ -338,12 +341,16 @@ export const getAllActiveListings = async (filters = {}) => {
     }
     query.foodCategory = cleanCat;
   }
-
   // building the sort based on what the user selected
   let sortField = { priorityScore: -1 };
+  // will sort by distance at the end, default sorts by priority if the distances are the same
+  if (filters.sort === "distance") sortField = { priorityScore: -1 };
   if (filters.sort === "expiration") sortField = { expirationTime: 1 };
   if (filters.sort === "newest") sortField = { postedAt: -1 };
-  if (filters.sort === "quantity") sortField = { priorityScore: -1 };
+  if (filters.sort === "quantity") {
+    // sort by quantity of the sum of all the items inside the listing
+    sortField = { totalQuantity: -1 };
+  }
 
   const allListings = await listings
     .aggregate([
@@ -370,11 +377,19 @@ export const getAllActiveListings = async (filters = {}) => {
         },
       },
       { $unwind: { path: "$donorDetails", preserveNullAndEmptyArrays: true } },
-      { $sort: sortField },
+      { 
+        // add fields to sort by quantity
+        $addFields: {
+          totalQuantity: {
+            $sum: "$items.quantity"
+          }
+        }
+      },
+        { $sort: sortField },
     ])
     .toArray();
 
-  return allListings.map((listing) => {
+  const result = allListings.map((listing) => {
     // Figure out the best name to display for the donor
     let donorName = "Unknown";
     if (listing.donorDetails) {
@@ -400,6 +415,7 @@ export const getAllActiveListings = async (filters = {}) => {
     return {
       _id: listing._id.toString(),
       donorId: listing.donorId.toString(),
+      addressId: listing.addressId.toString(),
       title: listing.title,
       description: listing.description,
       items: listing.items,
@@ -417,6 +433,35 @@ export const getAllActiveListings = async (filters = {}) => {
       pickupAddress,
     };
   });
+
+
+  /*
+    Sorts by distance for each listing object using calculateDistance().
+    Applies a distanceFactor to the results of the list that measures the distance to the user.
+    Sorts the returned list by that distanceFactor.
+  */
+  // get the latitute and longitude of each object in the array
+  // compare them all with the latitute and longitude of the user's marked location
+  // sort them based on the difference of each
+  if (filters.sort === "distance") {
+    const userId = h.checkAndThrowId(id, "userId");
+    const thisUser = await getUserById(userId);
+    if (thisUser.role !== "distributor") throw new Error("current user is not a distributor.");
+    const thisAddress = await getAddressById(thisUser.addressId.toString());
+
+    for (const entry of result) {
+      let entryAddress = await getAddressById(entry.addressId);
+      const distanceFactor = h.calculateDistance(
+        thisAddress.location.latitude,
+        thisAddress.location.longitude,
+        entryAddress.location.latitude,
+        entryAddress.location.longitude
+      );
+      entry.distanceFactor = distanceFactor;
+    } 
+    result.sort((a, b) => a.distanceFactor - b.distanceFactor);
+  }
+  return result;
 };
 
 // ---- getListingsByDonor ----
