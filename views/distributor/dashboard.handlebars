@@ -99,8 +99,8 @@
               {{#if this.transactionId}}
                 <a href="/chat/{{this.transactionId}}" class="btn btn-primary btn-sm">open chat</a>
 
-                <form action="/transactions/{{this._id}}/verify-pin" method="POST" class="pin-verify-form" style="margin-top:var(--space-2);">
-                  <input type="hidden" name="listingId" value="{{this._id}}" />
+            <form action="/transactions/{{this.transactionId}}/verify-pin" method="POST" class="pin-verify-form" style="margin-top:var(--space-2);">
+              <input type="hidden" name="listingId" value="{{this._id}}" />
                   <div style="display:flex; gap:var(--space-2); align-items:center;">
                     <input
                       type="text"
