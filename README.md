@@ -11,9 +11,9 @@
 
 ## Overview
 
-SurplusConnect is a full-stack web platform that bridges the gap between food businesses with surplus inventory and verified nonprofit organizations that distribute food to communities in need. Restaurants, bakeries, and food vendors post available donations with real-time countdown timers and priority scores. Verified 501(c)(3) distributors browse, claim, and coordinate pickups through an integrated chat system. Every completed donation generates a printable IRS-compliant tax receipt for the donor.
+SurplusConnect is a web platform that bridges the gap between food businesses with surplus inventory and verified nonprofit organizations that distribute food to communities in need. Restaurants, bakeries, and food vendors post available donations with real-time countdown timers and priority scores. Verified 501(c)(3) distributors browse, claim, and coordinate pickups through an integrated chat system. Every completed donation generates a printable IRS-compliant tax receipt for the donor.
 
-The platform enforces a secure four-role system covering donors, distributors, volunteers, and administrators, with session-based authentication, bcrypt password hashing, and a three-layer EIN verification pipeline against the IRS nonprofit database via the ProPublica Nonprofit Explorer API.
+The platform enforces a secure four-role system covering donors, distributors, volunteers, and administrators, with session-based authentication, bcrypt password hashing, and EIN verification against the IRS nonprofit database via the ProPublica Nonprofit Explorer API.
 
 ---
 
@@ -144,7 +144,7 @@ npm test
 
 ## Security
 
-**EIN Verification** — Distributor signups are validated through a three-layer pipeline: EIN format validation, IRS database existence check via the ProPublica Nonprofit Explorer API, and semantic overlap matching between the submitted organization name and the IRS-registered name. Accounts that fail verification are marked pending and cannot access platform features until resolved.
+**EIN Verification** — Distributor signups are validated through their EIN number: EIN format validation, IRS database existence check via the ProPublica Nonprofit Explorer API, and semantic overlap matching between the submitted organization name and the IRS-registered name. Accounts that fail verification are marked pending and cannot access platform features until resolved.
 
 **Pickup PIN** — When a distributor claims a listing, a 4-digit PIN is generated and displayed only to the donor. The distributor must obtain and enter the correct PIN before the platform marks the donation delivered and generates the receipt. This prevents fraudulent delivery confirmations.
 
