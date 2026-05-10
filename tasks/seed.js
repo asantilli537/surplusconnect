@@ -78,32 +78,32 @@ const main = async () => {
     volunteerPw,
     adminPw1,  adminPw2,  adminPw3,  adminPw4,
   ] = await Promise.all([
-    hashPw('DonorPass1!'),
-    hashPw('DonorPass2@'),
-    hashPw('DonorPass3#'),
-    hashPw('DonorPass4$'),
-    hashPw('DonorPass5%'),
-    hashPw('DonorPass6^'),
-    hashPw('DonorPass7&'),
-    hashPw('DonorPass8*'),
-    hashPw('DonorPass9('),
-    hashPw('DonorPass10)'),
+    hashPw('DonorPass1!23'),
+    hashPw('DonorPass2@34'),
+    hashPw('DonorPass3#45'),
+    hashPw('DonorPass4$56'),
+    hashPw('DonorPass5%67'),
+    hashPw('DonorPass6^78'),
+    hashPw('DonorPass7&89'),
+    hashPw('DonorPass8*90'),
+    hashPw('DonorPass9(01'),
+    hashPw('DonorPass10)2'),
     hashPw('BakeryPass123!'),
-    hashPw('DistPass1!'),
-    hashPw('DistPass2@'),
-    hashPw('DistPass3#'),
-    hashPw('DistPass4$'),
-    hashPw('DistPass5%'),
-    hashPw('DistPass6^'),
-    hashPw('DistPass7&'),
-    hashPw('DistPass8*'),
-    hashPw('DistPass9('),
-    hashPw('DistPass10)'),
-    hashPw('VolPass123!'),
-    hashPw('AdminPass1!'),
-    hashPw('AdminPass2@'),
-    hashPw('AdminPass3#'),
-    hashPw('AdminPass4$'),
+    hashPw('DistPass1!234'),
+    hashPw('DistPass2@345'),
+    hashPw('DistPass3#456'),
+    hashPw('DistPass4$567'),
+    hashPw('DistPass5%678'),
+    hashPw('DistPass6^789'),
+    hashPw('DistPass7&890'),
+    hashPw('DistPass8*901'),
+    hashPw('DistPass9(012'),
+    hashPw('DistPass10)23'),
+    hashPw('VolPass123!456'),
+    hashPw('AdminPass1!23'),
+    hashPw('AdminPass2@34'),
+    hashPw('AdminPass3#45'),
+    hashPw('AdminPass4$56'),
   ]);
 
   const userDocs = [
@@ -770,12 +770,12 @@ const main = async () => {
   console.log('---- seed complete ----');
   console.log('');
   console.log('test accounts:');
-  console.log('  donor:        pdesperaux@mbaguette.com        / DonorPass1!');
+  console.log('  donor:        pdesperaux@mbaguette.com        / DonorPass1!23');
   console.log('  donor 2:      sofia@hobokenbakery.com          / BakeryPass123!');
-  console.log('  distributor:  maria@communityfoodbank.org     / DistPass1!');
-  console.log('  distributor2: erodriguez@cityharvest.org      / DistPass2@');
-  console.log('  volunteer:    kevin@volunteer.com              / VolPass123!');
-  console.log('  admin:        sarah@surplusconnect-admin.com  / AdminPass4$');
+  console.log('  distributor:  maria@communityfoodbank.org     / DistPass1!234');
+  console.log('  distributor2: erodriguez@cityharvest.org      / DistPass2@345');
+  console.log('  volunteer:    kevin@volunteer.com              / VolPass123!456');
+  console.log('  admin:        sarah@surplusconnect-admin.com  / AdminPass4$56');
 
   await closeConnection();
 };
