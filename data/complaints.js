@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { complaintsCollection } from '../config/mongoCollections.js';
 import * as helpers from '../helpers.js';
+import { getUserById } from './users.js';
 import { auditLogsCollection } from '../config/mongoCollections.js';
 
 /*
@@ -138,6 +139,9 @@ export const resolveComplaint = async (complaintId, adminId) => {
   const cleanComplaintId = helpers.checkAndThrowId(String(complaintId), 'complaintId');
   const cleanAdminId     = helpers.checkAndThrowId(String(adminId),     'adminId');
 
+  const adminUser = await getUserById(cleanAdminId);
+  if (adminUser.role !== "admin") throw new Error("the current user is not authenticated as an admin");
+
   const complaints = await complaintsCollection();
   const complaint  = await complaints.findOne({ _id: new ObjectId(cleanComplaintId) });
 
@@ -176,6 +180,9 @@ export const resolveComplaint = async (complaintId, adminId) => {
   return { resolved: true, complaintId: cleanComplaintId };
 };
 
+/*
+  Grabs the nth most recent complaints in the database.
+*/
 export const getRecentComplaints = async (limit = 5) => {
 
   /* Input Validation */
