@@ -38,16 +38,6 @@ router.route('/volunteer/dashboard').get(requireRole('volunteer'), async (req, r
 
 router.route('/volunteer/pickups/:id/complete').post(requireRole('volunteer'), async (req, res) => {
   try {
-    const pickupId = xss(req.params.id || '').trim();
-
-    if (!pickupId) {
-      return res.status(400).render('error', {
-        pageTitle: 'Bad Request',
-        user:      req.session.user,
-        error:     'pickup id is required',
-      });
-    }
-
     return res.redirect('/volunteer/dashboard');
   } catch (e) {
     return res.status(500).render('error', {
