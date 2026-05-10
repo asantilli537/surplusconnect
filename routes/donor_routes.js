@@ -1,3 +1,5 @@
+import xss from 'xss';
+import { sanitizeListingBody } from '../helpers.js';
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { requireRole, requireLogin } from '../middleware.js';
@@ -10,7 +12,7 @@ import {
 } from '../data/listings.js';
 import { getReceiptById, getReceiptsByDonor } from '../data/receipts.js';
 import { listingsCollection, transactionsCollection, usersCollection } from '../config/mongoCollections.js';
-import { getAddressByCoordinates, getAddressById } from '../data/addresses.js';
+import { getAddressById } from '../data/addresses.js';
 
 const router = Router();
 
@@ -79,15 +81,16 @@ router.route('/listings/create')
     });
   })
   .post(requireRole('donor'), async (req, res) => {
+    const cleanBody = sanitizeListingBody(req.body);
 
     // route-level presence check before calling data function
     for (const field of listingRequiredFields) {
-      if (!req.body[field] || String(req.body[field]).trim().length === 0) {
+      if (!cleanBody[field] || cleanBody[field].length === 0) {
         return res.status(400).render('donor/listing-create', {
           pageTitle:    'Post a Listing',
           user:         req.session.user,
           errorMessage: `${field} is required`,
-          prevData:     req.body,
+          prevData:     cleanBody,
           pageScripts:  ['/public/js/form-validation.js'],
         });
       }
@@ -101,32 +104,27 @@ router.route('/listings/create')
     */
     // express urlencoded with extended:true already parses bracket
     // notation into a nested array so req.body.items is ready to use
-    const rawItems = req.body.items;
-    const items = Array.isArray(rawItems)
-      ? rawItems
-      : rawItems
-        ? [rawItems]
-        : [];
+    const items = cleanBody.items;
 
     if (items.length === 0) {
       return res.status(400).render('donor/listing-create', {
         pageTitle:    'Post a Listing',
         user:         req.session.user,
         errorMessage: 'at least one food item is required',
-        prevData:     req.body,
+        prevData:     cleanBody,
         pageScripts:  ['/public/js/form-validation.js'],
       });
     }
 
     try {
-      await createListing(req.session.user._id, { ...req.body, items });
+      await createListing(req.session.user._id, { ...cleanBody, items });
       return res.redirect('/donor/dashboard');
     } catch (e) {
       return res.status(400).render('donor/listing-create', {
         pageTitle:    'Post a Listing',
         user:         req.session.user,
         errorMessage: e.message,
-        prevData:     req.body,
+        prevData:     cleanBody,
         pageScripts:  ['/public/js/form-validation.js'],
       });
     }
@@ -137,7 +135,8 @@ router.route('/listings/create')
 router.route('/listings/:id/edit')
   .get(requireRole('donor'), async (req, res) => {
     try {
-      const listing = await getListingById(req.params.id);
+      const listingId = xss(req.params.id || '').trim();
+      const listing = await getListingById(listingId);
       const address = await getAddressById(listing.addressId.toString());
       // set address to the listing so we can populate the edit form
       listing.pickupAddress = address;
@@ -176,18 +175,21 @@ router.route('/listings/:id/edit')
     }
   })
   .post(requireRole('donor'), async (req, res) => {
+    const listingId = xss(req.params.id || '').trim();
+    const cleanBody = sanitizeListingBody(req.body);
+
     try {
-      await updateListing(req.params.id, req.session.user._id, req.body);
+      await updateListing(listingId, req.session.user._id, cleanBody);
       return res.redirect('/donor/dashboard');
     } catch (e) {
       // trying to reload the listing for the form repopulation
       let listing = null;
-      try { listing = await getListingById(req.params.id); } catch (_) {}
+      try { listing = await getListingById(listingId); } catch (_) {}
 
       return res.status(400).render('donor/listing-edit', {
         pageTitle:    'Edit Listing',
         user:         req.session.user,
-        listing:      listing || req.body,
+        listing:      listing || cleanBody,
         errorMessage: e.message,
         pageScripts:  ['/public/js/form-validation.js'],
       });
@@ -198,7 +200,8 @@ router.route('/listings/:id/edit')
 
 router.route('/listings/:id/delete').post(requireRole('donor'), async (req, res) => {
   try {
-    await deleteListing(req.params.id, req.session.user._id);
+    const listingId = xss(req.params.id || '').trim();
+    await deleteListing(listingId, req.session.user._id);
     return res.redirect('/donor/dashboard');
   } catch (e) {
     return res.status(500).render('error', {
@@ -253,7 +256,8 @@ router.route('/donor/history').get(requireRole('donor'), async (req, res) => {
 */
 router.route('/receipts/:id').get(requireLogin, async (req, res) => {
   try {
-    const receipt = await getReceiptById(req.params.id);
+    const receiptId = xss(req.params.id || '').trim();
+    const receipt = await getReceiptById(receiptId);
 
     // both the donor and the distributor involved can view the receipt
     const userId   = req.session.user._id;
