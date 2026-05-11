@@ -169,6 +169,23 @@ After running `npm run seed` the following accounts are available:
 
 ---
 
+## EIN Verification Testing
+
+The distributor signup form requires a valid 501(c)(3) EIN that matches the submitted organization name. The following EINs can be used to test verification:
+
+| EIN | Organization Name |
+|---|---|
+| 13-1234567 | Food Bank For New York City |
+| 13-2655529 | City Harvest |
+| 13-6221560 | Feeding America |
+| 13-1624100 | Community Food Bank |
+
+To test rejection, enter any invalid EIN such as `99-9999999`. The account will be created but marked as pending verification and will not have access to platform features until resolved by an admin.
+
+Additional EINs can be found at [ProPublica Nonprofit Explorer](https://projects.propublica.org/nonprofits).
+
+---
+
 ## Team
 
 Anthony Santilli · Daniel Petrovsky · Pranav Kulkarni · Zameer Qasim
